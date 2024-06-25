@@ -1,17 +1,17 @@
 import React from 'react'
-import Navbar from './navbar'
-import '../style/global.css'
+import Navibar from './NaviBar'
+import "bootstrap/dist/css/bootstrap.min.css"
 
 export default function Layout({ children }) {
   return (
     <div className="layout">
-        <Navbar />
+        <Navibar />
 
         <div className="content">
             { children }
         </div>
         
-        <footer>
+        <footer className="footer-block">
             Copyright 2024
         </footer>
     </div>

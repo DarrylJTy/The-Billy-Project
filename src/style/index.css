@@ -1,0 +1,19 @@
+.first-content-block, .branches-block, .review-block {
+    height: 456px;
+    background-color: #FFDEDE;
+    padding: 5px;
+    margin: 5px;
+}
+
+.text-area {
+    padding: 5px;
+    align-items: center;
+    display: flex;
+}
+.text-content > p {
+    color: black;
+}
+
+.index-container {
+    padding: 5px 120px !important;
+}
