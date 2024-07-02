@@ -10,3 +10,53 @@
     margin-right: 220px;
     background-color: #FF4747;
 }
+
+.item-slot {
+    background-color: #FFDEDE;
+    border: 2px #999696 solid;    
+    border-radius: 2px;
+}
+
+.item-image {
+    width: 100px;
+    height: 100px;
+    object-fit: cover;
+    border-radius: 8px;
+    margin-right: 20px;
+  }
+
+.item-image-container {
+    justify-content: center;
+}
+
+.item-details {
+    flex: 1;
+  }
+  
+  .item-name {
+    font-size: 1.2rem;
+    margin-bottom: 5px;
+  }
+  
+  .item-price {
+    font-size: 1rem;
+    color: #555;
+  }
+
+  .product-container {
+    padding: 20px;
+  }
+  
+  .product-table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+  
+  .product-table td {
+    padding: 10px;
+  }
+  
+  .product-table td img {
+    max-width: 100%;
+    height: auto;
+  }

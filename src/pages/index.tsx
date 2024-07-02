@@ -53,7 +53,7 @@ export default function Home() {
                     rel="noopener noreferrer"
                     className="btn btn-outline-dark button3"
                   >
-                    Review Us
+                    review us
                   </a>
                 </div>
               </div>

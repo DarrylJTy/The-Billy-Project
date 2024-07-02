@@ -1,0 +1,16 @@
+.filter-container {
+    border-right: 1px solid #999696;
+    background-color: #FFDEDE;
+}
+
+.filter-text-column {
+    color:black;
+}
+
+.checkbox-label {
+    color: black;
+}
+
+.tiles-container {
+    padding: 0.3125rem 7.5rem !important;
+}
