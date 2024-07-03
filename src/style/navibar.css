@@ -1,0 +1,19 @@
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap');
+
+* {
+    font-family: "Montserrat";
+}
+
+.container-block {
+    padding: 5px 120px !important;
+}
+
+nav .nav-link {
+    margin-left: 16px;
+    color: #999696;
+    text-decoration: none;
+}
+
+nav .nav-link:hover {
+    color: #F95858;
+}
