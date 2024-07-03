@@ -3,7 +3,7 @@ import logging from "../config/logging";
 import bcryptjs from "bcryptjs";
 import signJWT from "../functions/signJWT";
 import { Connect, Query } from "../config/mysql";
-import IUser from "../interfaces/UserInterface";
+import IAdmin from "../interfaces/AdminInterface";
 import IMySQLResult from "../interfaces/SQLResult";
 
 const NAMESPACE = "User";
@@ -26,8 +26,6 @@ const register = (req: Request, res: Response, next: NextFunction) => {
 				error: hashError,
 			});
 		}
-
-		// TODO: Insert user into DB
 
 		let query =
 			'INSERT INTO users (username, password) VALUES  ("${username}," "${hash}")';
@@ -70,7 +68,7 @@ const login = (req: Request, res: Response, next: NextFunction) => {
 
 	Connect()
 		.then((connection) => {
-			Query<IUser[]>(connection, query)
+			Query<IAdmin[]>(connection, query)
 				.then((users) => {
 					bcryptjs.compare(
 						password,
@@ -123,7 +121,7 @@ const getAllUsers = (req: Request, res: Response, next: NextFunction) => {
 
 	Connect()
 		.then((connection) => {
-			Query<IUser[]>(connection, query)
+			Query<IAdmin[]>(connection, query)
 				.then((users) => {
 					return res.status(200).json({
 						users,
