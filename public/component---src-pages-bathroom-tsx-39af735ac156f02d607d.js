@@ -1,0 +1,2 @@
+"use strict";(self.webpackChunkthe_billy_project=self.webpackChunkthe_billy_project||[]).push([[261],{9303:function(e,t,l){l.r(t),l.d(t,{default:function(){return r}});var n=l(7294),c=l(2609);function r(){return n.createElement(c.Z,null,n.createElement("div",{className:"bg-black"},n.createElement("h1",null,"bathroom")))}}}]);
+//# sourceMappingURL=component---src-pages-bathroom-tsx-39af735ac156f02d607d.js.map

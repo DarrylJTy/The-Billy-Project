@@ -1,0 +1,2 @@
+"use strict";(self.webpackChunkthe_billy_project=self.webpackChunkthe_billy_project||[]).push([[12],{5153:function(e,t,l){l.r(t),l.d(t,{default:function(){return r}});var n=l(7294),c=l(2609);function r(){return n.createElement(c.Z,null,n.createElement("div",{className:"bg-black"},n.createElement("h1",null,"tiles")))}}}]);
+//# sourceMappingURL=component---src-pages-tiles-tsx-176a303694a8088c5cba.js.map
