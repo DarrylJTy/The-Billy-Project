@@ -40,41 +40,42 @@ const Sidebar = () => {
 						</NavLink>
 						<NavLink
 							exact
-							to="/tables"
+							to="/ViewItems"
 							activeClassName="activeClicked"
 						>
 							<CDBSidebarMenuItem icon="table">
-								Tables
+								Items
 							</CDBSidebarMenuItem>
 						</NavLink>
 						<NavLink
 							exact
-							to="/profile"
+							to="/404" // for master admin panel to register new branches or admin accounts
 							activeClassName="activeClicked"
 						>
 							<CDBSidebarMenuItem icon="user">
-								Profile page
+								Admins
 							</CDBSidebarMenuItem>
+							<hr/>
 						</NavLink>
 						<NavLink
 							exact
-							to="/analytics"
+							to="/404"
 							activeClassName="activeClicked"
 						>
-							<CDBSidebarMenuItem icon="chart-line">
-								Analytics
-							</CDBSidebarMenuItem>
+							{/* <CDBSidebarMenuItem icon="chart-line"> */}
+								{/* Analytics */}
+							{/* </CDBSidebarMenuItem> */}
 						</NavLink>
 
 						<NavLink
 							exact
-							to="/hero404"
+							to="/404"
 							target="_blank"
 							activeClassName="activeClicked"
 						>
-							<CDBSidebarMenuItem icon="exclamation-circle">
+							{/* <CDBSidebarMenuItem icon="exclamation-circle">
 								404 page
-							</CDBSidebarMenuItem>
+							</CDBSidebarMenuItem> */}
 						</NavLink>
 					</CDBSidebarMenu>
 				</CDBSidebarContent>
