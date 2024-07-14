@@ -9,8 +9,13 @@ const ItemService = {
     createItem: async (itemData) => {
         return await axios.post(API_URL, itemData);
     },
-    deleteItem: async (itemId) => {
-        return await axios.delete(`${API_URL}/${itemId}`);
+    updateItem: async (itemData) => {{
+        console.log(itemData);
+        return await axios.post(`${API_URL}/update`, itemData);
+    }},
+    deleteItem: async (item_id) => {
+        console.log(item_id);
+        return await axios.post(`${API_URL}/delete`, {item_id});
     }
 };
 

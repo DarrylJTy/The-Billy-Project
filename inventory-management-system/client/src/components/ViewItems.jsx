@@ -32,6 +32,7 @@ const ViewItems = () => {
     const handleDelete = async (itemId) => {
         try {
             await ItemService.deleteItem(itemId);
+            console.log('Deleting item with id:', itemId);
             fetchItems(); // Refresh item list
         } catch (error) {
             console.error('Error deleting item:', error);
@@ -40,7 +41,6 @@ const ViewItems = () => {
 
     const handleShowModal = () => {
         setShowModal(true);
-        setIsUpdateMode(false); // Reset to create mode when modal is shown
         setItemData({
             item_name: '',
             description: '',
@@ -58,8 +58,20 @@ const ViewItems = () => {
 
     const handleUpdate = async () => {
         try {
-            await ItemService.updateItem(selectedItem.item_id, itemData);
+            // Prepare updated item data from itemData
+            const updatedItem = {
+                item_id: selectedItem.item_id, // Assuming item_id is needed for update
+                item_name: itemData.item_name !== '' ? itemData.item_name : selectedItem.item_name,
+                description: itemData.description !== '' ? itemData.description : selectedItem.description,
+                quantity: itemData.quantity !== '' ? itemData.quantity : selectedItem.quantity,
+                price: itemData.price !== '' ? itemData.price : selectedItem.price,
+                branch_id: itemData.branch_id !== '' ? itemData.branch_id : selectedItem.branch_id
+            };
+            await ItemService.updateItem(updatedItem);
+            console.log(updatedItem);
             alert('Item Updated');
+            setSelectedItem(null);
+            console.log(selectedItem);
             fetchItems(); // Refresh item list
             handleCloseModal(); // Close modal after submission
         } catch (error) {
@@ -73,8 +85,9 @@ const ViewItems = () => {
     };
 
     const handleEdit = (item) => {
-        setSelectedItem(item);
         setIsUpdateMode(true); // Set modal to update mode
+        setSelectedItem(item);
+        // Populate itemData with current item details
         setItemData({
             item_name: item.item_name,
             description: item.description,
@@ -82,8 +95,9 @@ const ViewItems = () => {
             price: item.price,
             branch_id: item.branch_id
         });
-        handleShowModal();
+        handleShowModal(); // Show the modal for editing
     };
+    
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -127,7 +141,7 @@ const ViewItems = () => {
                                         <td>{item.quantity}</td>
                                         <td>Php {item.price.toFixed(2)}</td>
                                         <td className='d-flex align-items-center justify-content-center'>
-                                            <Button variant="warning" onClick={() => handleEdit(item)} className="m-1">Update</Button>
+                                            <Button variant="warning" onClick={() => handleEdit(item) } className="m-1">Update</Button>
                                             <Button variant="danger" onClick={() => handleDelete(item.item_id)}>Delete</Button>
                                         </td>
                                     </tr>
@@ -152,23 +166,23 @@ const ViewItems = () => {
                             <Form onSubmit={handleSubmit}>
                                 <Form.Group controlId="itemName">
                                     <Form.Label>Item Name</Form.Label>
-                                    <Form.Control type="text" name="item_name" value={itemData.item_name} onChange={handleChange} required />
+                                    <Form.Control type="text" name="item_name" value={itemData.item_name} onChange={handleChange} required={!isUpdateMode} />
                                 </Form.Group>
                                 <Form.Group controlId="description">
                                     <Form.Label>Description</Form.Label>
-                                    <Form.Control type="text" name="description" value={itemData.description} onChange={handleChange} required />
+                                    <Form.Control type="text" name="description" value={itemData.description} onChange={handleChange} required={!isUpdateMode} />
                                 </Form.Group>
                                 <Form.Group controlId="quantity">
                                     <Form.Label>Quantity</Form.Label>
-                                    <Form.Control type="number" name="quantity" value={itemData.quantity} onChange={handleChange} required />
+                                    <Form.Control type="number" name="quantity" value={itemData.quantity} onChange={handleChange} required={!isUpdateMode} />
                                 </Form.Group>
                                 <Form.Group controlId="price">
                                     <Form.Label>Price (Php)</Form.Label>
-                                    <Form.Control type="number" step="0.01" name="price" value={itemData.price} onChange={handleChange} required />
+                                    <Form.Control type="number" step="0.01" name="price" value={itemData.price} onChange={handleChange} required={!isUpdateMode} />
                                 </Form.Group>
                                 <Form.Group controlId="branch_id">
                                     <Form.Label>Branch ID</Form.Label>
-                                    <Form.Control type="text" name="branch_id" value={itemData.branch_id} onChange={handleChange} required />
+                                    <Form.Control type="text" name="branch_id" value={itemData.branch_id} onChange={handleChange} required={!isUpdateMode} />
                                 </Form.Group>
                                 <Button variant="primary" type="submit" className="mt-2">
                                     {isUpdateMode ? 'Update Item' : 'Add Item'}

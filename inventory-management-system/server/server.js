@@ -5,6 +5,7 @@ import jwt from 'jsonwebtoken';
 import bcrypt from 'bcrypt';
 import cookieParser from 'cookie-parser';
 const saltRounds = 10;
+import {ItemRouter as itemRouter} from '../server/routers/ItemRouter.js'
 
 const app = express();
 app.use(express.json());
@@ -104,139 +105,7 @@ app.get('/logout', (req, res) => {
     return res.json({Status: "Success"})
 })
 
-// ----------------------------------------------
-
-// Create an item
-app.post("/items", (req, res) => {
-	const {
-		item_name,
-		description,
-		quantity,
-		price,
-		item_image,
-		branch_id,
-	} = req.body;
-	const created_at = new Date();
-	const updated_at = new Date();
-
-	const insertQuery =
-		"INSERT INTO Item (item_name, description, quantity, price, item_image, created_at, updated_at, branch_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
-	db.query(
-		insertQuery,
-		[
-			item_name,
-			description,
-			quantity,
-			price,
-			item_image,
-			created_at,
-			updated_at,
-			branch_id,
-		],
-		(err, result) => {
-			if (err) {
-				console.error(err);
-				return res
-					.status(500)
-					.json({ error: "Failed to create item" });
-			}
-			return res
-				.status(201)
-				.json({ message: "Item created successfully" });
-		}
-	);
-});
-
-// Get all items
-app.get("/items", (req, res) => {
-	const selectQuery = "SELECT * FROM Item";
-	db.query(selectQuery, (err, result) => {
-		if (err) {
-			console.error(err);
-			return res
-				.status(500)
-				.json({ error: "Failed to retrieve items" });
-		}
-		return res.status(200).json(result);
-	});
-});
-
-// Get item by ID
-app.get("/items/:id", (req, res) => {
-	const itemId = req.params.id;
-	const selectQuery = "SELECT * FROM Item WHERE item_id = ?";
-	db.query(selectQuery, [itemId], (err, result) => {
-		if (err) {
-			console.error(err);
-			return res
-				.status(500)
-				.json({ error: "Failed to retrieve item" });
-		}
-		if (result.length === 0) {
-			return res.status(404).json({ message: "Item not found" });
-		}
-		return res.status(200).json(result[0]);
-	});
-});
-
-// Update an item
-app.put("/items/:id", (req, res) => {
-	const itemId = req.params.id;
-	const {
-		item_name,
-		description,
-		quantity,
-		price,
-		item_image,
-		branch_id,
-	} = req.body;
-	const updated_at = new Date();
-
-	const updateQuery =
-		"UPDATE Item SET item_name = ?, description = ?, quantity = ?, price = ?, item_image = ?, updated_at = ?, branch_id = ? WHERE item_id = ?";
-	db.query(
-		updateQuery,
-		[
-			item_name,
-			description,
-			quantity,
-			price,
-			item_image,
-			updated_at,
-			branch_id,
-			itemId,
-		],
-		(err, result) => {
-			if (err) {
-				console.error(err);
-				return res
-					.status(500)
-					.json({ error: "Failed to update item" });
-			}
-			return res
-				.status(200)
-				.json({ message: "Item updated successfully" });
-		}
-	);
-});
-
-// Delete an item
-app.delete("/items/:id", (req, res) => {
-	const itemId = req.params.id;
-	const deleteQuery = "DELETE FROM Item WHERE item_id = ?";
-	db.query(deleteQuery, [itemId], (err, result) => {
-		if (err) {
-			console.error(err);
-			return res.status(500).json({ error: "Failed to delete item" });
-		}
-		return res
-			.status(200)
-			.json({ message: "Item deleted successfully" });
-	});
-});
-
-
-// ----------------------------------------------
+app.use('/items', itemRouter)
 
 app.listen(8001, () => {
     console.log('Running in port 8001')
