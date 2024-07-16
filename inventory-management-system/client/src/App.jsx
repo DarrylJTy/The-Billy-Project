@@ -11,9 +11,9 @@ export default function App() {
   return (
     <BrowserRouter>
       <Routes>
-        <Route path='/' element={<Login />} />
+        <Route path='/' element={<Home />} />
         <Route path='/register' element={<Register />} />
-        {/* <Route path='/login' element={<Login />} /> */}
+        <Route path='/login' element={<Login />} />
         <Route path='/viewitems' element={<ViewItems />} />
         <Route path='/additem' element={<AddItem />} />
         <Route path='/404' element={<NotFound />} />

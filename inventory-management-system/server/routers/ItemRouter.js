@@ -1,18 +1,33 @@
-// ItemRouter.js
 import express from "express";
-import mysql from "mysql";
+import db from "../db.js";
+import multer from "multer";
 
-const db = mysql.createConnection({
-    host: "thebillyproject-db.c102sq8osf99.ap-southeast-2.rds.amazonaws.com",
-    user: "root",
-    password: "*ROOTpass121212*",
-    database: "The-Billy-Project"
+const storage = multer.diskStorage({
+	destination: (req, file, cb) => {
+		cb(null, 'public/images');
+	},
+	filename: (req, file, cb) => {
+		cb(null, `img-${file.originalname}`)
+	}
+})
+
+const isImage = (req, file, cb) => {
+	if(file.mimetype.startsWith("img")) {
+		cb(null, true);
+	} else {
+		cb(null, Error("Please upload an image."))
+	}
+}
+
+const upload = multer({
+	storage: storage,
+	fileFilter:isImage
 })
 
 const ItemRouter = express.Router();
 
 // Create an item
-ItemRouter.post("/", (req, res) => {
+ItemRouter.post("/create", upload.single("item_image"), (req, res) => {
 	const {
 		item_name,
 		description,
@@ -23,6 +38,8 @@ ItemRouter.post("/", (req, res) => {
 	} = req.body;
 	const created_at = new Date();
 	const updated_at = new Date();
+	console.log(req.body);
+	console.log(req.file.filename);
 
 	const insertQuery =
 		"INSERT INTO Item (item_name, description, quantity, price, item_image, created_at, updated_at, branch_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
@@ -33,7 +50,7 @@ ItemRouter.post("/", (req, res) => {
 			description,
 			quantity,
 			price,
-			item_image,
+			req.file.filename,
 			created_at,
 			updated_at,
 			branch_id,
@@ -65,24 +82,6 @@ ItemRouter.get("/", (req, res) => {
 		return res.status(200).json(result);
 	});
 });
-
-// // Get item by ID
-// ItemRouter.get("/:id", (req, res) => {
-// 	const itemId = req.params.id;
-// 	const selectQuery = "SELECT * FROM Item WHERE item_id = ?";
-// 	db.query(selectQuery, [itemId], (err, result) => {
-// 		if (err) {
-// 			console.error(err);
-// 			return res
-// 				.status(500)
-// 				.json({ error: "Failed to retrieve item" });
-// 		}
-// 		if (result.length === 0) {
-// 			return res.status(404).json({ message: "Item not found" });
-// 		}
-// 		return res.status(200).json(result[0]);
-// 	});
-// });
 
 // Update an item
 ItemRouter.post("/update", (req, res) => {

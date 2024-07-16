@@ -18,7 +18,7 @@ const Sidebar = () => {
 				overflow: "scroll initial",
 			}}
 		>
-			<CDBSidebar textColor="#fff" backgroundColor="#333">
+			<CDBSidebar textColor="#fff" backgroundColor="#960018">
 				<CDBSidebarHeader
 					prefix={<i className="fa fa-bars fa-large"></i>}
 				>
@@ -27,7 +27,7 @@ const Sidebar = () => {
 						className="text-decoration-none"
 						style={{ color: "inherit" }}
 					>
-						Sidebar
+						Mr Billy
 					</a>
 				</CDBSidebarHeader>
 
@@ -57,26 +57,9 @@ const Sidebar = () => {
 							</CDBSidebarMenuItem>
 							<hr/>
 						</NavLink>
-						<NavLink
-							exact
-							to="/404"
-							activeClassName="activeClicked"
-						>
-							{/* <CDBSidebarMenuItem icon="chart-line"> */}
-								{/* Analytics */}
-							{/* </CDBSidebarMenuItem> */}
-						</NavLink>
+				
 
-						<NavLink
-							exact
-							to="/404"
-							target="_blank"
-							activeClassName="activeClicked"
-						>
-							{/* <CDBSidebarMenuItem icon="exclamation-circle">
-								404 page
-							</CDBSidebarMenuItem> */}
-						</NavLink>
+
 					</CDBSidebarMenu>
 				</CDBSidebarContent>
 
@@ -86,7 +69,7 @@ const Sidebar = () => {
 							padding: "20px 5px",
 						}}
 					>
-						Sidebar Footer
+						Inventory
 					</div>
 				</CDBSidebarFooter>
 			</CDBSidebar>

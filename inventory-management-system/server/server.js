@@ -1,9 +1,9 @@
 import express from 'express';
-import mysql from 'mysql';
 import cors from 'cors';
 import jwt from 'jsonwebtoken';
 import bcrypt from 'bcrypt';
 import cookieParser from 'cookie-parser';
+import db from './db.js'
 const saltRounds = 10;
 import {ItemRouter as itemRouter} from '../server/routers/ItemRouter.js'
 
@@ -14,27 +14,8 @@ app.use(cors({
     methods: ["POST", "GET"],
     credentials: true
 }));
+
 app.use(cookieParser());
-
-const db = mysql.createConnection({
-    host: "thebillyproject-db.c102sq8osf99.ap-southeast-2.rds.amazonaws.com",
-    user: "root",
-    password: "*ROOTpass121212*",
-    database: "The-Billy-Project"
-})
-
-// just to check connection
-
-// const pool = mysql.createPool({
-//     host: "thebillyproject-db.c102sq8osf99.ap-southeast-2.rds.amazonaws.com",
-//     user: "root",
-//     password: "*ROOTpass121212*",
-//     database: "The-Billy-Project"
-// })
-
-// if(pool) {
-//     console.log("nice connection");
-// }
 
 const verifyUser = (req, res, next) => {
     const token = req.cookies.token;

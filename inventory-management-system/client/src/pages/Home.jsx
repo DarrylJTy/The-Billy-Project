@@ -9,7 +9,7 @@ function Home() {
     const [username, setUsername] = useState('');
     
     useEffect(() => {
-        axios.post('http://localhost:8001', { withCredentials: true})
+        axios.get('http://localhost:8001', { withCredentials: true})
         .then(res => {
             if(res.data.Status === "Success") {
                 setAuth(true);
