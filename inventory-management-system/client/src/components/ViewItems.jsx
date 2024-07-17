@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Table, Button, Modal, Form } from 'react-bootstrap';
 import ItemService from '../services/ItemService';
 import Layout from './Layout';
+import TokenDecoder from '../services/TokenDecoder';
 
 const ViewItems = () => {
     const [items, setItems] = useState([]);
@@ -159,7 +160,7 @@ const ViewItems = () => {
                     </div>
 
                     <div className="text-center">
-                        <Button variant="success" onClick={handleShowModal} className="mt-2">
+                        <Button variant="success" onClick={TokenDecoder.getAdminFromToken} className="mt-2">
                             Create Item
                         </Button>
                     </div>

@@ -4,6 +4,7 @@ import jwt from 'jsonwebtoken';
 import bcrypt from 'bcrypt';
 import cookieParser from 'cookie-parser';
 import db from './db.js'
+import {config} from 'dotenv';
 const saltRounds = 10;
 import {ItemRouter as itemRouter} from '../server/routers/ItemRouter.js'
 
@@ -17,18 +18,18 @@ app.use(cors({
 
 app.use(cookieParser());
 
+config();
+
 const verifyUser = (req, res, next) => {
     const token = req.cookies.token;
-    console.log(req.cookies.token);
     if(!token) {
-        console.log(req.cookies.token);
-        return res.json({Error: "You not authenticated." + req.cookies.token})
+        return res.json({Error: "You not authenticated."})
     } else {
-        jwt.verify(token, "secret", (err, decoded) => {
+        jwt.verify(token, process.env.JWT_SECRET, (err, decoded) => {
             if(err) {
                 return res.json({Error: "Error with token."})
             } else {
-                req.username = decoded.username;
+                req.admin = decoded;
                 next();
             }
         })
@@ -36,7 +37,7 @@ const verifyUser = (req, res, next) => {
 }
 
 app.get('/', verifyUser, (req, res) => {
-    return res.json({Status: "Success", username: req.username})
+    return res.json({Status: "Success", username: req.admin.username})
 })
 
 app.post('/register', (req, res) =>{
@@ -57,8 +58,6 @@ app.post('/register', (req, res) =>{
     })
 })
 
-// work on cookies on why its not working
-
 app.post('/login', (req, res) => {
     const query = 'SELECT * FROM Admin WHERE username = ?';
     db.query(query, [req.body.username], (error, data) => {
@@ -67,9 +66,17 @@ app.post('/login', (req, res) => {
             bcrypt.compare(req.body.password.toString(), data[0].password, (error, response) => {
                 if(error) return res.json({Error: "Password compare error."})
             if(response) {
-                const username = data[0].username;
-                const token = jwt.sign({username}, "secret", {expiresIn: '1d'}) // change this to a private key in an .env file
+                const admin = {
+                    admin_id: data[0].admin_id,
+                    username: data[0].username,
+                    password: data[0].password,
+                    role: data[0].role,
+                    branch_id: data[0].branch_id
+                };
+                const token = jwt.sign(admin, process.env.JWT_SECRET, {expiresIn: '1h'}) // change this to a private key in an .env file
+                
                 res.cookie('token', token);
+
                 return res.json({Status: "Success"});
             } else {
                 return res.json({Error: "Incorrect Password."});

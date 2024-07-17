@@ -16,7 +16,7 @@ function Login() {
         axios.post('http://localhost:8001/login', values)
         .then(res => {
             if(res.data.Status === "Success") {
-                navigate('/ViewItems')
+                navigate('/ViewItems') // change to dashboard when completed
             } else {
                 alert("Error");
 
