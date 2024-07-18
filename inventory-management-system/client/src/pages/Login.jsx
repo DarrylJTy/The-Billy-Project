@@ -1,5 +1,6 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import TokenDecoder from "../services/TokenDecoder";
 import axios from "axios";
 
 
@@ -8,18 +9,32 @@ function Login() {
         username: '',
         password: '',
     })
+	const [isMasterAdmin, setIsMasterAdmin] = useState(false);
 
-    const navigate = useNavigate()
+	useEffect(() => {
+		const checkAdminStatus = async () => {
+			const status = await TokenDecoder.isMasterAdmin();
+			setIsMasterAdmin(status);
+		};
+		checkAdminStatus();
+	}, []);
+
     axios.defaults.withCredentials = true;
+
+	const navigate = useNavigate();
     const handleSubmit = (event) => {
         event.preventDefault();
         axios.post('http://localhost:8001/login', values)
         .then(res => {
             if(res.data.Status === "Success") {
-                navigate('/ViewItems') // change to dashboard when completed
+				if(isMasterAdmin) {
+					navigate('/ViewAll')
+				} else {
+					navigate('/ViewItems') // change to dashboard when completed
+				}
+                
             } else {
                 alert("Error");
-
             }
         })
         .then(err => console.log(err));

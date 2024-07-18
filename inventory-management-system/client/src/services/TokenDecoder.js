@@ -1,35 +1,23 @@
 import {jwtDecode} from 'jwt-decode';
 
 const TokenDecoder = {
-    getAdminFromToken: async () => {
-        const token = localStorage.getItem("token");
+    getAdminFromToken: async () => { // This function will get the information from the cookie.
+        const token = document.cookie; // Gets the cookie from the page.
         try {
-            console.log(token);
-            // const decodedToken = jwtDecode(token);
-            // console.log(decodedToken);
-            // return decodedToken;
-            return token;
+            const decodedToken = jwtDecode(token); // Decodes the token to show the information of the admin user.
+            return decodedToken; // Returns the decoded token
         } catch (error) {
-            // console.error('Error decoding token:', error);
-            console.log(token)
+            console.error('Error decoding token:', error);
             return token;
         }
     },
-    getAdminRole: async () => {
-        const token = localStorage.getItem('token');
-        if(token) {
-            const admin = getUserFromToken(token);
-            if (admin) {
-                console.log('Admin attributes from token:', admin);
-                if (admin.adminRole === 'branch_user') {
-                    // Perform actions for this admin role
-                    console.log('Admin role verified on client side:', admin.role);
-                } else {
-                    // Handle case where admin role does not match
-                    console.log('Invalid admin role on client side:', admin.role);
-                }
-            }
-        }
+    isMasterAdmin: async () => {
+        const admin = await TokenDecoder.getAdminFromToken();
+        return admin ? admin.role === 'admin' : false;
+    },
+    getBranchId: async () => {
+        const admin = await TokenDecoder.getAdminFromToken();
+        return admin.branch_id;
     }
 };
 

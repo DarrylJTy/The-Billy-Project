@@ -1,24 +1,24 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import Layout from '../components/Layout'
 
 function Home() {
     const [auth, setAuth] = useState(false);
     const [message, setMessage] = useState('');
     const [username, setUsername] = useState('');
+
+    const navigate = useNavigate();
     
     useEffect(() => {
         axios.get('http://localhost:8001', { withCredentials: true})
         .then(res => {
             if(res.data.Status === "Success") {
                 setAuth(true);
-                console.log(res.data.Status);
                 setUsername(res.data.username);
                 navigate('/login');
             } else {
-                setAuth(false);
-                console.log(res.data.Status);   
+                setAuth(false); 
                 setMessage(res.data.Error);
             }
         })

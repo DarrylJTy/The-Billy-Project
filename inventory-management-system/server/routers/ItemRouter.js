@@ -83,6 +83,20 @@ ItemRouter.get("/", (req, res) => {
 	});
 });
 
+// Get items from a specific branch
+ItemRouter.post("/getFromBranch", (req, res) => {
+	const selectQuery = "SELECT * FROM Item WHERE branch_id = ?";
+	db.query(selectQuery, [req.body.branch_id], (err, result) => {
+		if (err) {
+			console.error(err);
+			return res
+				.status(500)
+				.json({ error: "Failed to retrieve items" });
+		}
+		return res.status(200).json(result);
+	});
+});
+
 // Update an item
 ItemRouter.post("/update", (req, res) => {
 	const {
@@ -117,7 +131,6 @@ ItemRouter.post("/update", (req, res) => {
 					.status(500)
 					.json({ error: "Failed to update item" });
 			}
-			console.log(req.body);
 			return res
 				.status(200)
 				.json({ message: "Item updated successfully" });

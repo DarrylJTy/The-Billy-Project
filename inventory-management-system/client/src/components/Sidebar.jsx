@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import {
 	CDBSidebar,
 	CDBSidebarContent,
@@ -8,8 +8,39 @@ import {
 	CDBSidebarMenuItem,
 } from "cdbreact";
 import { NavLink } from "react-router-dom";
+import TokenDecoder from "../services/TokenDecoder";
 
 const Sidebar = () => {
+	const [isMasterAdmin, setIsMasterAdmin] = useState(false);
+
+	useEffect(() => {
+		const checkAdminStatus = async () => {
+			const status = await TokenDecoder.isMasterAdmin();
+			setIsMasterAdmin(status);
+		};
+		checkAdminStatus();
+	}, []);
+
+	const showMenuItems = () => { // Responsible for showing menu items only master admin can see
+		if (isMasterAdmin) {
+			return (
+				<>
+					<NavLink exact to="/404" activeClassName="activeClicked">
+						<CDBSidebarMenuItem icon="user">
+							Admins
+						</CDBSidebarMenuItem>
+					</NavLink>
+					<NavLink exact to="/404" activeClassName="activeClicked">
+						<CDBSidebarMenuItem icon="store">
+							Branches
+						</CDBSidebarMenuItem>
+					</NavLink>
+				</>
+			);
+		}
+		return <></>;
+	};
+
 	return (
 		<div
 			style={{
@@ -23,7 +54,7 @@ const Sidebar = () => {
 					prefix={<i className="fa fa-bars fa-large"></i>}
 				>
 					<a
-						href="/"
+						href="/home"
 						className="text-decoration-none"
 						style={{ color: "inherit" }}
 					>
@@ -33,32 +64,22 @@ const Sidebar = () => {
 
 				<CDBSidebarContent className="sidebar-content">
 					<CDBSidebarMenu>
-						<NavLink exact to="/" activeClassName="activeClicked">
+						<NavLink exact to="/home" activeClassName="activeClicked">
 							<CDBSidebarMenuItem icon="columns">
 								Dashboard
 							</CDBSidebarMenuItem>
 						</NavLink>
 						<NavLink
 							exact
-							to="/ViewItems"
+							to="/ViewItems" // fix this to be dynamic 
 							activeClassName="activeClicked"
 						>
 							<CDBSidebarMenuItem icon="table">
 								Items
 							</CDBSidebarMenuItem>
 						</NavLink>
-						<NavLink
-							exact
-							to="/404" // for master admin panel to register new branches or admin accounts
-							activeClassName="activeClicked"
-						>
-							<CDBSidebarMenuItem icon="user">
-								Admins
-							</CDBSidebarMenuItem>
-							<hr/>
-						</NavLink>
-				
-
+						{showMenuItems()}
+						<hr/>
 
 					</CDBSidebarMenu>
 				</CDBSidebarContent>

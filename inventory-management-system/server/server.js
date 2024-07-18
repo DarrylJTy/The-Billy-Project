@@ -6,7 +6,8 @@ import cookieParser from 'cookie-parser';
 import db from './db.js'
 import {config} from 'dotenv';
 const saltRounds = 10;
-import {ItemRouter as itemRouter} from '../server/routers/ItemRouter.js'
+import {ItemRouter} from '../server/routers/ItemRouter.js'
+import {BranchRouter} from '../server/routers/BranchRouter.js'
 
 const app = express();
 app.use(express.json());
@@ -36,7 +37,7 @@ const verifyUser = (req, res, next) => {
     }
 }
 
-app.get('/', verifyUser, (req, res) => {
+app.get('/home', verifyUser, (req, res) => {
     return res.json({Status: "Success", username: req.admin.username})
 })
 
@@ -93,7 +94,8 @@ app.get('/logout', (req, res) => {
     return res.json({Status: "Success"})
 })
 
-app.use('/items', itemRouter)
+app.use('/items', ItemRouter)
+app.use('/branches', BranchRouter)
 
 app.listen(8001, () => {
     console.log('Running in port 8001')

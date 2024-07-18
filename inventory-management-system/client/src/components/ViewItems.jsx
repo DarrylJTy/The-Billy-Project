@@ -1,21 +1,21 @@
 import React, { useEffect, useState } from 'react';
 import { Table, Button, Modal, Form } from 'react-bootstrap';
 import ItemService from '../services/ItemService';
-import Layout from './Layout';
 import TokenDecoder from '../services/TokenDecoder';
+import Layout from './Layout';
 
 const ViewItems = () => {
     const [items, setItems] = useState([]);
     const [showModal, setShowModal] = useState(false);
     const [isUpdateMode, setIsUpdateMode] = useState(false); 
     const [selectedItem, setSelectedItem] = useState(null); 
+    const [branch_id, setBranchId] = useState(null);
     const [itemData, setItemData] = useState({
         item_name: '',
         description: '',
         quantity: '',
         price: '',
         item_image: '',
-        branch_id: ''
     });
     const [item_image, setItemImage] = useState({});
 
@@ -24,12 +24,23 @@ const ViewItems = () => {
     }
 
     useEffect(() => {
+        const fetchBranchId = async () => {
+            try {
+                const branchId = await TokenDecoder.getBranchId();
+                setBranchId(branchId);
+            } catch (error) {
+                console.error('Error fetching admin branch ID:', error);
+            }
+        }
+        fetchBranchId
         fetchItems();
     }, []);
 
     const fetchItems = async () => {
         try {
-            const response = await ItemService.getAllItems();
+            const adminBranchId = await TokenDecoder.getBranchId();
+            setBranchId(adminBranchId);
+            const response = await ItemService.getFromBranch(adminBranchId);
             setItems(response.data);
         } catch (error) {
             console.error('Error fetching items:', error);
@@ -88,7 +99,7 @@ const ViewItems = () => {
 
     const handleChange = (e) => {
         const { name, value } = e.target;
-        setItemData({ ...itemData, [name]: value });
+        setItemData({ ...itemData, [name]: value});
     };
 
     const handleEdit = (item) => {
@@ -101,7 +112,6 @@ const ViewItems = () => {
             quantity: item.quantity,
             price: item.price,
             item_image: item_image,
-            branch_id: item.branch_id
         });
         handleShowModal(); 
     };
@@ -160,7 +170,7 @@ const ViewItems = () => {
                     </div>
 
                     <div className="text-center">
-                        <Button variant="success" onClick={TokenDecoder.getAdminFromToken} className="mt-2">
+                        <Button variant="success" onClick={handleShowModal} className="mt-2">
                             Create Item
                         </Button>
                     </div>
@@ -186,10 +196,6 @@ const ViewItems = () => {
                                 <Form.Group controlId="price">
                                     <Form.Label>Price (Php)</Form.Label>
                                     <Form.Control type="number" step="0.01" name="price" value={itemData.price} onChange={handleChange} required={!isUpdateMode} autoComplete="off"/>
-                                </Form.Group>
-                                <Form.Group controlId="branch_id">
-                                    <Form.Label>Branch ID</Form.Label>
-                                    <Form.Control type="text" name="branch_id" value={itemData.branch_id} onChange={handleChange} required={!isUpdateMode} />
                                 </Form.Group>
                                 <Form.Group controlId="item_image">
                                     <Form.Label>Photo</Form.Label>
