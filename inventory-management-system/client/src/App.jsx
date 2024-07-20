@@ -10,6 +10,7 @@ import BranchProtectedRoutes from "../utils/BranchProtectedRoutes";
 import NotFound from './pages/404';
 import TokenDecoder from "./services/TokenDecoder";
 import ProtectedRoute from "../utils/ProtectedRoutes";
+import Branches from "./components/Branches";
 
 export default function App() {
   const token = document.cookie;
@@ -52,6 +53,7 @@ export default function App() {
           <>
             <Route path="/viewallitems" element={<ViewAll />}/>
             <Route path="/viewitems" element={<Navigate to="/viewallitems" />}/>
+            <Route path="/branches" element={<Branches/>}/>
           </>
         )}
         </Route>

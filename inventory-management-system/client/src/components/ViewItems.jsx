@@ -1,15 +1,16 @@
 import React, { useEffect, useState } from 'react';
 import { Table, Button, Modal, Form } from 'react-bootstrap';
 import ItemService from '../services/ItemService';
-import TokenDecoder from '../services/TokenDecoder';
 import Layout from './Layout';
+import firebaseapp from '../../../server/firebase';
+import { getStorage, ref, uploadBytes, getDownloadURL } from "firebase/storage";
 
 const ViewItems = () => {
     const [items, setItems] = useState([]);
     const [showModal, setShowModal] = useState(false);
     const [isUpdateMode, setIsUpdateMode] = useState(false); 
-    const [selectedItem, setSelectedItem] = useState(null); 
-    const [branch_id, setBranchId] = useState(null);
+    const [selectedItem, setSelectedItem] = useState(null);
+    const [branch_id, setBranchId] = useState(null); 
     const [itemData, setItemData] = useState({
         item_name: '',
         description: '',
@@ -17,11 +18,6 @@ const ViewItems = () => {
         price: '',
         item_image: '',
     });
-    const [item_image, setItemImage] = useState({});
-
-    const setImageFile = (e) => {
-        setItemImage(e.target.files[0]);
-    }
 
     useEffect(() => {
         const fetchBranchId = async () => {
@@ -38,9 +34,7 @@ const ViewItems = () => {
 
     const fetchItems = async () => {
         try {
-            const adminBranchId = await TokenDecoder.getBranchId();
-            setBranchId(adminBranchId);
-            const response = await ItemService.getFromBranch(adminBranchId);
+            const response = await ItemService.getAllItems();
             setItems(response.data);
         } catch (error) {
             console.error('Error fetching items:', error);
@@ -74,20 +68,21 @@ const ViewItems = () => {
         setSelectedItem(null); 
     };
 
-    const handleUpdate = async () => {
+    const handleUpdate = async (updatedItemData) => {
         try {
+            // Update only the fields that have new values
             const updatedItem = {
                 item_id: selectedItem.item_id, 
-                item_name: itemData.item_name !== '' ? itemData.item_name : selectedItem.item_name,
-                description: itemData.description !== '' ? itemData.description : selectedItem.description,
-                quantity: itemData.quantity !== '' ? itemData.quantity : selectedItem.quantity,
-                price: itemData.price !== '' ? itemData.price : selectedItem.price,
-                item_image: itemData.item_image !== '' ? itemData.item_image : selectedItem.item_image,
-                branch_id: itemData.branch_id !== '' ? itemData.branch_id : selectedItem.branch_id
+                item_name: updatedItemData.item_name || selectedItem.item_name,
+                description: updatedItemData.description || selectedItem.description,
+                quantity: updatedItemData.quantity || selectedItem.quantity,
+                price: updatedItemData.price || selectedItem.price,
+                item_image: updatedItemData.item_image || selectedItem.item_image,
+                branch_id: updatedItemData.branch_id || selectedItem.branch_id
             };
+    
             await ItemService.updateItem(updatedItem);
-            console.log(updatedItem)
-
+            console.log("Updated item_image:", updatedItem.item_image);
             alert('Item Updated');
             setSelectedItem(null);
             fetchItems(); 
@@ -99,37 +94,46 @@ const ViewItems = () => {
 
     const handleChange = (e) => {
         const { name, value } = e.target;
-        setItemData({ ...itemData, [name]: value});
+        setItemData({ ...itemData, [name]: value });
     };
 
     const handleEdit = (item) => {
         setIsUpdateMode(true); 
         setSelectedItem(item);
-        
         setItemData({
             item_name: item.item_name,
             description: item.description,
             quantity: item.quantity,
             price: item.price,
-            item_image: item_image,
+            item_image: item.item_image, // Set image URL for edit
+            branch_id: branch_id,
         });
         handleShowModal(); 
     };
     
     const handleSubmit = async (e) => {
         e.preventDefault();
-        if (isUpdateMode) {
-            handleUpdate();
-        } else {
-            try {
-                await ItemService.createItem(itemData, item_image);
+        try {    
+            const newItemData = {
+                ...itemData,
+            };
+    
+            if (isUpdateMode) {
+                await handleUpdate(newItemData);
+            } else {
+                await ItemService.createItem(newItemData);
+                console.log(newItemData);
                 alert('Item Added');
                 fetchItems(); 
                 handleCloseModal(); 
-            } catch (error) {
-                console.error('Error creating item:', error);
             }
+        } catch (error) {
+            console.error('Error creating or updating item:', error);
         }
+    };
+
+    const handleImageChange = (e) => {
+        setItemImage(e.target.files[0]); // Update the state with the selected file
     };
 
     return (
@@ -151,16 +155,25 @@ const ViewItems = () => {
                                 </tr>
                             </thead>
                             <tbody>
-                                {items.map((item, index) => (
+                                {items.map((item) => (
                                     <tr key={item.item_id}>
                                         <td>{item.item_id}</td>
-                                        <th>{item.image}</th>
+                                        <td>
+                                            {item.item_image ? (
+                                                <img 
+                                                    src={item.item_image} 
+                                                    style={{ width: '100px', height: '100px', objectFit: 'cover' }} 
+                                                />
+                                            ) : (
+                                                <span>No image uploaded</span> // or leave it empty: <span>&nbsp;</span>
+                                            )}
+                                        </td>
                                         <td>{item.item_name}</td>
                                         <td>{item.description}</td>
                                         <td>{item.quantity}</td>
                                         <td>Php {item.price.toFixed(2)}</td>
                                         <td className='d-flex align-items-center justify-content-center'>
-                                            <Button variant="warning" onClick={() => handleEdit(item) } className="m-1">Update</Button>
+                                            <Button variant="warning" onClick={() => handleEdit(item)} className="m-1">Update</Button>
                                             <Button variant="danger" onClick={() => handleDelete(item.item_id)}>Delete</Button>
                                         </td>
                                     </tr>
@@ -189,6 +202,10 @@ const ViewItems = () => {
                                     <Form.Label>Description</Form.Label>
                                     <Form.Control type="text" name="description" value={itemData.description} onChange={handleChange} required={!isUpdateMode} autoComplete="off"/>
                                 </Form.Group>
+                                <Form.Group controlId="size">
+                                    <Form.Label>Size</Form.Label>
+                                    <Form.Control type="text" name="size" value={itemData.test} onChange={handleChange} required={!isUpdateMode} autoComplete="off"/>
+                                </Form.Group>
                                 <Form.Group controlId="quantity">
                                     <Form.Label>Quantity</Form.Label>
                                     <Form.Control type="number" name="quantity" value={itemData.quantity} onChange={handleChange} required={!isUpdateMode} autoComplete="off"/>
@@ -199,7 +216,13 @@ const ViewItems = () => {
                                 </Form.Group>
                                 <Form.Group controlId="item_image">
                                     <Form.Label>Photo</Form.Label>
-                                    <Form.Control type="file" name="item_image" value={itemData.item_image} onChange={setImageFile} required={!isUpdateMode} multiple="false" accept="image/*"/>
+                                    <Form.Control 
+                                        type="file" 
+                                        name="item_image" 
+                                        onChange={handleImageChange} 
+                                        required={!isUpdateMode} 
+                                        accept="image/*"
+                                    />
                                 </Form.Group>
                                 <Button variant="primary" type="submit" className="mt-2">
                                     {isUpdateMode ? 'Update Item' : 'Add Item'}

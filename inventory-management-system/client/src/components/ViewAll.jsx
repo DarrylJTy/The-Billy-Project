@@ -88,7 +88,16 @@ const ViewAll = () => {
                                 {filteredItems.map((item, index) => (
                                     <tr key={item.item_id}>
                                         <td>{item.item_id}</td>
-                                        <td>{item.image}</td>
+                                        <td>
+                                            {item.item_image ? (
+                                                <img 
+                                                    src={item.item_image} 
+                                                    style={{ width: '100px', height: '100px', objectFit: 'cover' }} 
+                                                />
+                                            ) : (
+                                                <span>No image uploaded</span> // or leave it empty: <span>&nbsp;</span>
+                                            )}
+                                        </td>
                                         <td>{item.item_name}</td>
                                         <td>{item.description}</td>
                                         <td>{item.quantity}</td>
