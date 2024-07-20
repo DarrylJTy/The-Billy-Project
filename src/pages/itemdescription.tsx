@@ -5,7 +5,7 @@ import "../style/global.css"
 export default function itemdescription() {
   return (
     <Layout>
-      <div>itemdescription</div>
+      <div>item description</div>
     </Layout>
   )
 }
