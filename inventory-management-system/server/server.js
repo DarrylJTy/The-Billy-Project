@@ -37,7 +37,7 @@ const verifyUser = (req, res, next) => {
     }
 }
 
-app.get('/home', verifyUser, (req, res) => {
+app.get('/', verifyUser, (req, res) => {
     return res.json({Status: "Success", username: req.admin.username})
 })
 

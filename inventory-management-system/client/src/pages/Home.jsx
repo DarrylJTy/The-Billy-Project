@@ -11,12 +11,11 @@ function Home() {
     const navigate = useNavigate();
     
     useEffect(() => {
-        axios.get('http://localhost:8001', { withCredentials: true})
+        axios.get('http://localhost:8001/', { withCredentials: true})
         .then(res => {
             if(res.data.Status === "Success") {
                 setAuth(true);
                 setUsername(res.data.username);
-                navigate('/login');
             } else {
                 setAuth(false); 
                 setMessage(res.data.Error);
@@ -26,7 +25,7 @@ function Home() {
     })
 
     const handleDelete = () => {
-        axios.get('http://localhost:8001/logout')
+        axios.get('http://localhost:8001/logout',{ withCredentials: true})
         .then(res => {
             location.reload(true);
         }).catch(err => console.log(err));

@@ -54,7 +54,6 @@ const Sidebar = () => {
 					prefix={<i className="fa fa-bars fa-large"></i>}
 				>
 					<a
-						href="/home"
 						className="text-decoration-none"
 						style={{ color: "inherit" }}
 					>
@@ -64,14 +63,14 @@ const Sidebar = () => {
 
 				<CDBSidebarContent className="sidebar-content">
 					<CDBSidebarMenu>
-						<NavLink exact to="/home" activeClassName="activeClicked">
+						<NavLink exact to="/" activeClassName="activeClicked">
 							<CDBSidebarMenuItem icon="columns">
 								Dashboard
 							</CDBSidebarMenuItem>
 						</NavLink>
 						<NavLink
 							exact
-							to="/ViewItems" // fix this to be dynamic 
+							to={isMasterAdmin ? "/viewallitems" : "/viewitems"}
 							activeClassName="activeClicked"
 						>
 							<CDBSidebarMenuItem icon="table">
