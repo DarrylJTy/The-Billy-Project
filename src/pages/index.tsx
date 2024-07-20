@@ -13,18 +13,20 @@ export default function Home() {
             <div className='d-flex flex-row first-content-block'>
               <div className="col-sm text-area">
                 <div className="text-content">
-                  <p>
                     <h2>Quality Tiles for Every Space</h2><br />
+                    <p>
                     Explore a wide range of tiles that blend style and durability, perfect for any space in your home or office.
                   </p>
+                  <Link to="/catalog" className="btn btn-outline-dark button1">
+                  View Our Catalog
+                  </Link>
                 </div>
+                
               </div>
 
               <div className="col-sm px-0 img-area">
-                <img src="../living-space.png" className="img-fluid image1"/>
-                <Link to="/tiles" className="btn btn-outline-dark button1">
-                  shop now
-                </Link>
+                <img src="../index-picture.png" className="img-fluid image1"/>
+                
               </div>
             </div>
 
@@ -36,7 +38,7 @@ export default function Home() {
                     Check out our branches located in Laguna and Metro Manila. 
                   </p>
                   <Link to="/branches" className="btn btn-outline-dark button2">
-                    branches
+                    See Our Branches
                   </Link>
                 </div>
               </div>

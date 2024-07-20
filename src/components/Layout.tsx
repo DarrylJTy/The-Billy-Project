@@ -1,5 +1,6 @@
 import React from 'react'
 import Navibar from './NaviBar'
+import CustomFooter from './CustomFooter'
 import "bootstrap/dist/css/bootstrap.min.css"
 
 export default function Layout({ children }) {
@@ -11,9 +12,7 @@ export default function Layout({ children }) {
             { children }
         </div>
         
-        <footer className="footer-block">
-            Copyright 2024
-        </footer>
+        <CustomFooter />
     </div>
   )
 }

@@ -6,17 +6,23 @@ import "../style/navibar.css"
 export default function Navibar() {
   return (
     <Navbar className="bg-white shadow-sm">
-      <Container fluid className='container-block'>
-          <img src="../mrbillylogorevamp.png" className='img-fluid' />
-          <Nav className='me-auto'>
-            <Link to="/" className='nav-link'>home</Link>
-            <Link to="/tiles" className='nav-link'>tiles</Link>
-            <Link to="/bathroom" className='nav-link'>bathroom</Link>
-            <Link to="/doors" className='nav-link'>doors</Link>
-          </Nav>
-          <Link to="/branches" className='nav-link'>branches</Link>
-          <Link to="/about" className='nav-link'>about us</Link>
+      <Container fluid className='container-block d-flex flex-column align-items-center'>
+        <div className="logo-container">
+          <img src="../logo-text.png" className='img-fluid custom-logo' alt="Logo" />
+        </div>
+        <Nav className='nav-container'>
+          <CustomNavLink to="/" title="Home"/>
+          <CustomNavLink to="/catalog" title="Catalog" />
+          <CustomNavLink to="/branches" title="Contact" />
+          <CustomNavLink to="/about" title="About" />
+        </Nav>
       </Container>
     </Navbar>
   )
 }
+
+const CustomNavLink = ({ to, title }) => (
+  <Link to={to} className='nav-link' activeClassName='active-link' partiallyActive={to !== '/'}>
+    {title}
+  </Link>
+);

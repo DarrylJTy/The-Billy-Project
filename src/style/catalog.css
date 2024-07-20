@@ -1,0 +1,26 @@
+.filter-container {
+    border-right: 1px solid #999696;
+    padding-top: 25px;
+}
+
+.filter-text-column > h2{
+    color:black;
+    font-size: 32px;    
+}
+
+.checkbox-label {
+    color: black;
+}
+
+.tiles-container {
+    padding: 0.3125rem 7.5rem !important;
+}
+
+.product-title > h3 {
+    color: black;
+    font-size: 40px; 
+}
+
+.product-title {
+    padding-bottom: 30px;
+}
