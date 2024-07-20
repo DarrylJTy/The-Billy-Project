@@ -1,12 +1,11 @@
 import React from 'react'
 import Layout  from "../components/Layout"
+import "../style/global.css"
 
-export default function doors() {
+export default function itemdescription() {
   return (
     <Layout>
-        <div className="bg-black">
-            <h1>doors</h1>
-        </div>
+      <div>itemdescription</div>
     </Layout>
   )
 }

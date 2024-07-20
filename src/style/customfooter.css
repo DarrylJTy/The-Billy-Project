@@ -1,0 +1,64 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap');
+
+body {
+    font-family: Poppins;
+}
+.footer {
+    background-color: #ff5349; /* Adjust the color to match your design */
+    color: white !important;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.3125rem 7.5rem !important;
+}
+.footer .left, .footer .right {
+    width: 25%;
+    color: white !important;
+    padding: 0.5rem;
+}
+
+.left > P, .center > p {
+    color: white !important;
+}
+.left > p {
+    font-size: 16px;
+}
+
+.footer .center {
+    text-align: center;
+}
+.footer .center img {
+    width: 50px;
+    height: auto;
+}
+.footer .social-icons {
+    display: flex;
+    justify-content: center;
+    margin-top: 10px;
+}
+.footer .social-icons a {
+    color: white;
+    margin: 0 10px;
+    text-decoration: none;
+    font-size: 24px;
+}
+.footer .social-icons a:hover {
+    color: #ddd;
+}
+.footer .right ul {
+    list-style: none;
+    padding: 0;
+}
+.footer .right ul li {
+    margin: 5px 0;
+}
+.footer .right ul li a {
+    color: white;
+    text-decoration: none;
+}
+.footer .right ul li a:hover {
+    text-decoration: underline;
+}
+p {
+    color: white;
+}
