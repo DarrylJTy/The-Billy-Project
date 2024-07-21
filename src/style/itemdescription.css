@@ -1,0 +1,44 @@
+.item-description-container {
+    padding: 0.3125rem 7.5rem !important;
+}
+
+.catalog-button {
+    padding: 2.3125rem 0rem !important;
+}
+
+.image-item {
+    display: flex;
+    justify-content: flex-end;
+    padding: 0rem 2.3125rem !important;
+}
+
+.image-item img {
+    object-fit: contain;
+    border: 2px solid #000;
+    border-radius: 5px;
+  }
+.description {
+    text-align: justify;
+    margin-right: 5rem !important;
+}
+
+.image-item {
+    flex: 0 0 40%;
+    max-width: 40%;
+}
+
+.product-details {
+    flex: 0 0 60%;
+    max-width: 60%;
+}
+
+.size-selector {
+    display: flex;
+    align-items: center;
+    gap: 10px; 
+}
+
+.size-dropdown {
+    max-width: 120px;
+    margin-bottom: 15px !important;
+}
