@@ -5,12 +5,11 @@ import Register from './pages/Register';
 import Login from './pages/Login';
 import ViewItems from "./components/ViewItems";
 import ViewAll from "./components/ViewAll";
-import AdminProtectedRoutes from "../utils/AdminProtectedRoutes";
-import BranchProtectedRoutes from "../utils/BranchProtectedRoutes";
 import NotFound from './pages/404';
 import TokenDecoder from "./services/TokenDecoder";
 import ProtectedRoute from "../utils/ProtectedRoutes";
 import Branches from "./components/Branches";
+import Admins from "./components/Admins";
 
 export default function App() {
   const token = document.cookie;
@@ -53,7 +52,8 @@ export default function App() {
           <>
             <Route path="/viewallitems" element={<ViewAll />}/>
             <Route path="/viewitems" element={<Navigate to="/viewallitems" />}/>
-            <Route path="/branches" element={<Branches/>}/>
+            <Route path="/branches" element={<Branches />}/>
+            <Route path="/admins" element={<Admins />} />
           </>
         )}
         </Route>

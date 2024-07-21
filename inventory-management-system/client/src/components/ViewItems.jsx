@@ -14,7 +14,7 @@ const ViewItems = () => {
     const [selectedItem, setSelectedItem] = useState(null);
     const [branch_id, setBranchId] = useState([]); 
     const [branch_name, setBranchName] = useState(null);
-    const [imageURL, setImageURL] = useState("");
+    const [item_image, setItemImage] = useState(null);
     const [itemData, setItemData] = useState({
         item_name: '',
         description: '',
@@ -24,6 +24,7 @@ const ViewItems = () => {
         branch_id: '',
         item_image: '',
     });
+
 
     useEffect(() => {
         const fetchBranchId = async () => {
@@ -49,7 +50,8 @@ const ViewItems = () => {
 
     const fetchItems = async () => {
         try {
-            const response = await ItemService.getAllItems();
+            const branch_id = await TokenDecoder.getBranchId();
+            const response = await ItemService.getFromBranch(branch_id);
             setItems(response.data);
         } catch (error) {
             console.error('Error fetching items:', error);
@@ -76,6 +78,7 @@ const ViewItems = () => {
             price: '',
             item_image: '',
         });
+        setItemImage(null); // Reset image
     };
 
     const handleCloseModal = () => {
@@ -84,9 +87,32 @@ const ViewItems = () => {
         setSelectedItem(null); 
     };
 
+    const getImagePath = async () => {
+        const branch_id = await TokenDecoder.getBranchId();
+        const branch = await BranchService.getSpecificBranchName(branch_id);
+
+        const branch_name = branch.data[0].branch_name;
+
+        console.log(branch)
+
+        const imagePath = `${branch_id}-${branch_name}`;
+
+        return imagePath;
+    }
+
     const handleUpdate = async (updatedItemData) => {
         try {
-            // Update only the fields that have new values and are not null/undefined
+            let updatedImageURL = updatedItemData.item_image;
+
+            const imagePath = await getImagePath();
+
+            if (item_image) {
+                const storageRef = ref(imgDB, `${imagePath}/` + item_image.name);
+                await uploadBytes(storageRef, item_image);
+                updatedImageURL = await getDownloadURL(storageRef);
+                // console.log("updatedImageURL:", updatedImageURL);
+            }
+
             const updatedItem = {
                 item_id: selectedItem.item_id, 
                 item_name: updatedItemData.item_name !== '' ? updatedItemData.item_name : selectedItem.item_name,
@@ -125,7 +151,18 @@ const ViewItems = () => {
     
     const handleSubmit = async (e) => {
         e.preventDefault();
-        try {    
+        try {  
+            let imageURL = itemData.item_image;
+
+            const imagePath = await getImagePath();
+
+            if (item_image) {
+                const storageRef = ref(imgDB, `${imagePath}/` + item_image.name);
+                console.log(branch_name);
+                await uploadBytes(storageRef, item_image);
+                imageURL = await getDownloadURL(storageRef);
+                // console.log("ImageURL:", imageURL);
+            }
             const newItemData = {
                 ...itemData,
                 branch_id: await TokenDecoder.getBranchId(), // Ensure branch_id is included
@@ -151,20 +188,8 @@ const ViewItems = () => {
 
     };
 
-    async function handleImageChange (e) {
-        const image = e.target.files[0];
-        if (image) {
-            try {
-                const storageRef = ref(imgDB, `${await TokenDecoder.getBranchId()}/${itemData.item_name}`);
-                await uploadBytes(storageRef, image);
-                const downloadURL = await getDownloadURL(storageRef);
-                setImageURL(downloadURL);
-                setItemData({ ...itemData, item_image: downloadURL });
-                console.log(downloadURL);
-            } catch (error) {
-                console.log(error);
-            }
-        }
+    const handleImageChange = (e) => {
+        setItemImage(e.target.files[0]); // Update the state with the selected file
     };
 
     return (

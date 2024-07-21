@@ -6,8 +6,10 @@ const ItemService = {
     getAllItems: async () => {
         return await axios.get(API_URL);
     },
+    getFromBranch: async (branch_id) => {
+        return await axios.post(`${API_URL}/getFromBranch`, {branch_id})
+    },
     createItem: async (itemData) => {
-        console.log(itemData);
         return await axios.post(`${API_URL}/create`, itemData);
     },
     updateItem: async (itemData) => {{
