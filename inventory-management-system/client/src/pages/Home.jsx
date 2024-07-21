@@ -19,6 +19,7 @@ function Home() {
             } else {
                 setAuth(false); 
                 setMessage(res.data.Error);
+                navigate("/login");
             }
         })
         .then(err => console.log(err));

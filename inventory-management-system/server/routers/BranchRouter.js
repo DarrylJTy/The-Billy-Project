@@ -16,4 +16,15 @@ BranchRouter.get("/getBranches", (req, res) => {
 	});
 })
 
+BranchRouter.get("/getSpecificBranchName", (req, res) => {
+	const selectQuery = "SELECT branch_name FROM Branch WHERE branch_id = ?";
+	db.query(selectQuery, [req.body.branch_id , 0], (err, result) => {
+		if (err) {
+            console.error(err);
+            return res.status(500).json({ error: "Failed to retrieve branch" });
+        }
+        return res.status(200).json(result);
+    });
+})
+
 export {BranchRouter};

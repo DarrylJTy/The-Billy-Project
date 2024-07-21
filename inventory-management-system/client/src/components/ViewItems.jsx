@@ -1,21 +1,27 @@
 import React, { useEffect, useState } from 'react';
 import { Table, Button, Modal, Form } from 'react-bootstrap';
 import ItemService from '../services/ItemService';
+import BranchService from '../services/BranchService';
 import Layout from './Layout';
-import firebaseapp from '../../../server/firebase';
-import { getStorage, ref, uploadBytes, getDownloadURL } from "firebase/storage";
+import { imgDB } from '../services/firebase';
+import { ref, uploadBytes, getDownloadURL  } from "firebase/storage";
+import TokenDecoder from '../services/TokenDecoder';
 
 const ViewItems = () => {
     const [items, setItems] = useState([]);
     const [showModal, setShowModal] = useState(false);
     const [isUpdateMode, setIsUpdateMode] = useState(false); 
     const [selectedItem, setSelectedItem] = useState(null);
-    const [branch_id, setBranchId] = useState(null); 
+    const [branch_id, setBranchId] = useState([]); 
+    const [branch_name, setBranchName] = useState(null);
+    const [imageURL, setImageURL] = useState("");
     const [itemData, setItemData] = useState({
         item_name: '',
         description: '',
+        size: '',
         quantity: '',
         price: '',
+        branch_id: '',
         item_image: '',
     });
 
@@ -28,7 +34,16 @@ const ViewItems = () => {
                 console.error('Error fetching admin branch ID:', error);
             }
         }
-        fetchBranchId
+        const fetchBranchName = async () => {
+            try {
+                const branch_name = await BranchService.getSpecificBranchName(branch_id);
+                setBranchName(branch_name);
+            } catch (error) {
+                console.error('Error fetching admin branch Name:', error);
+            }
+        }
+        fetchBranchId;
+        fetchBranchName;
         fetchItems();
     }, []);
 
@@ -56,9 +71,10 @@ const ViewItems = () => {
         setItemData({
             item_name: '',
             description: '',
+            size: '',
             quantity: '',
             price: '',
-            branch_id: ''
+            item_image: '',
         });
     };
 
@@ -70,19 +86,19 @@ const ViewItems = () => {
 
     const handleUpdate = async (updatedItemData) => {
         try {
-            // Update only the fields that have new values
+            // Update only the fields that have new values and are not null/undefined
             const updatedItem = {
                 item_id: selectedItem.item_id, 
-                item_name: updatedItemData.item_name || selectedItem.item_name,
-                description: updatedItemData.description || selectedItem.description,
-                quantity: updatedItemData.quantity || selectedItem.quantity,
-                price: updatedItemData.price || selectedItem.price,
-                item_image: updatedItemData.item_image || selectedItem.item_image,
-                branch_id: updatedItemData.branch_id || selectedItem.branch_id
+                item_name: updatedItemData.item_name !== '' ? updatedItemData.item_name : selectedItem.item_name,
+                description: updatedItemData.description !== '' ? updatedItemData.description : selectedItem.description,
+                size: updatedItemData.size !== '' ? updatedItemData.size : selectedItem.size,
+                quantity: updatedItemData.quantity !== '' ? updatedItemData.quantity : selectedItem.quantity,
+                price: updatedItemData.price !== '' ? updatedItemData.price : selectedItem.price,
+                item_image: updatedItemData.item_image !== '' ? updatedItemData.item_image : selectedItem.item_image,
+                branch_id: await TokenDecoder.getBranchId(),
             };
     
             await ItemService.updateItem(updatedItem);
-            console.log("Updated item_image:", updatedItem.item_image);
             alert('Item Updated');
             setSelectedItem(null);
             fetchItems(); 
@@ -92,20 +108,16 @@ const ViewItems = () => {
         }
     };
 
-    const handleChange = (e) => {
-        const { name, value } = e.target;
-        setItemData({ ...itemData, [name]: value });
-    };
-
     const handleEdit = (item) => {
         setIsUpdateMode(true); 
         setSelectedItem(item);
         setItemData({
             item_name: item.item_name,
             description: item.description,
+            size: item.size,
             quantity: item.quantity,
             price: item.price,
-            item_image: item.item_image, // Set image URL for edit
+            item_image: item.item_image,
             branch_id: branch_id,
         });
         handleShowModal(); 
@@ -116,13 +128,14 @@ const ViewItems = () => {
         try {    
             const newItemData = {
                 ...itemData,
+                branch_id: await TokenDecoder.getBranchId(), // Ensure branch_id is included
+                item_image: imageURL,
             };
     
             if (isUpdateMode) {
                 await handleUpdate(newItemData);
             } else {
                 await ItemService.createItem(newItemData);
-                console.log(newItemData);
                 alert('Item Added');
                 fetchItems(); 
                 handleCloseModal(); 
@@ -131,9 +144,27 @@ const ViewItems = () => {
             console.error('Error creating or updating item:', error);
         }
     };
+    
+    const handleTextChange = (e) => {
+        const { name, value } = e.target;
+        setItemData({ ...itemData, [name]: value });
 
-    const handleImageChange = (e) => {
-        setItemImage(e.target.files[0]); // Update the state with the selected file
+    };
+
+    async function handleImageChange (e) {
+        const image = e.target.files[0];
+        if (image) {
+            try {
+                const storageRef = ref(imgDB, `${await TokenDecoder.getBranchId()}/${itemData.item_name}`);
+                await uploadBytes(storageRef, image);
+                const downloadURL = await getDownloadURL(storageRef);
+                setImageURL(downloadURL);
+                setItemData({ ...itemData, item_image: downloadURL });
+                console.log(downloadURL);
+            } catch (error) {
+                console.log(error);
+            }
+        }
     };
 
     return (
@@ -149,6 +180,7 @@ const ViewItems = () => {
                                     <th>Photo</th>
                                     <th>Name</th>
                                     <th>Description</th>
+                                    <th>Size</th>
                                     <th>Quantity</th>
                                     <th>Price</th>
                                     <th className="text-center">Actions</th>
@@ -170,6 +202,7 @@ const ViewItems = () => {
                                         </td>
                                         <td>{item.item_name}</td>
                                         <td>{item.description}</td>
+                                        <td>{item.size}</td>
                                         <td>{item.quantity}</td>
                                         <td>Php {item.price.toFixed(2)}</td>
                                         <td className='d-flex align-items-center justify-content-center'>
@@ -196,23 +229,23 @@ const ViewItems = () => {
                             <Form onSubmit={handleSubmit}>
                                 <Form.Group controlId="itemName">
                                     <Form.Label>Item Name</Form.Label>
-                                    <Form.Control type="text" name="item_name" value={itemData.item_name} onChange={handleChange} required={!isUpdateMode} autoComplete="off"/>
+                                    <Form.Control type="text" name="item_name" value={itemData.item_name} onChange={handleTextChange} required={!isUpdateMode} autoComplete="off"/>
                                 </Form.Group>
                                 <Form.Group controlId="description">
                                     <Form.Label>Description</Form.Label>
-                                    <Form.Control type="text" name="description" value={itemData.description} onChange={handleChange} required={!isUpdateMode} autoComplete="off"/>
+                                    <Form.Control type="text" name="description" value={itemData.description} onChange={handleTextChange} required={!isUpdateMode} autoComplete="off"/>
                                 </Form.Group>
                                 <Form.Group controlId="size">
                                     <Form.Label>Size</Form.Label>
-                                    <Form.Control type="text" name="size" value={itemData.test} onChange={handleChange} required={!isUpdateMode} autoComplete="off"/>
+                                    <Form.Control type="text" name="size" value={itemData.size} onChange={handleTextChange} required={!isUpdateMode} autoComplete="off"/>
                                 </Form.Group>
                                 <Form.Group controlId="quantity">
                                     <Form.Label>Quantity</Form.Label>
-                                    <Form.Control type="number" name="quantity" value={itemData.quantity} onChange={handleChange} required={!isUpdateMode} autoComplete="off"/>
+                                    <Form.Control type="number" name="quantity" value={itemData.quantity} onChange={handleTextChange} required={!isUpdateMode} autoComplete="off"/>
                                 </Form.Group>
                                 <Form.Group controlId="price">
                                     <Form.Label>Price (Php)</Form.Label>
-                                    <Form.Control type="number" step="0.01" name="price" value={itemData.price} onChange={handleChange} required={!isUpdateMode} autoComplete="off"/>
+                                    <Form.Control type="number" step="0.01" name="price" value={itemData.price} onChange={handleTextChange} required={!isUpdateMode} autoComplete="off"/>
                                 </Form.Group>
                                 <Form.Group controlId="item_image">
                                     <Form.Label>Photo</Form.Label>

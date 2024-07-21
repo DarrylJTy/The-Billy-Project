@@ -80,6 +80,7 @@ ItemRouter.post("/update", (req, res) => {
 	const {
 		item_name,
 		description,
+		size,
 		quantity,
 		price,
 		item_image,
@@ -89,12 +90,13 @@ ItemRouter.post("/update", (req, res) => {
 	const updated_at = new Date();
 
 	const updateQuery =
-		"UPDATE Item SET item_name = ?, description = ?, quantity = ?, price = ?, item_image = ?, updated_at = ?, branch_id = ? WHERE item_id = ?";
+		"UPDATE Item SET item_name = ?, description = ?, size = ?, quantity = ?, price = ?, item_image = ?, updated_at = ?, branch_id = ? WHERE item_id = ?";
 	db.query(
 		updateQuery,
 		[
 			item_name,
 			description,
+			size,
 			quantity,
 			price,
 			item_image,

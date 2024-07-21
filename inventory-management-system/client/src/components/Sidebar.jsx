@@ -16,7 +16,10 @@ const Sidebar = () => {
 	useEffect(() => {
 		const checkAdminStatus = async () => {
 			const status = await TokenDecoder.isMasterAdmin();
-			setIsMasterAdmin(status);
+			if(status) {
+				setIsMasterAdmin(status);
+			}
+			
 		};
 		checkAdminStatus();
 	}, []);
