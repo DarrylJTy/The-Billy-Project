@@ -8,6 +8,7 @@ import {config} from 'dotenv';
 const saltRounds = 10;
 import {ItemRouter} from '../server/routers/ItemRouter.js'
 import {BranchRouter} from '../server/routers/BranchRouter.js'
+import { AdminRouter } from './routers/AdminRouter.js';
 
 const app = express();
 app.use(express.json());
@@ -60,7 +61,7 @@ app.post('/register', (req, res) =>{
 })
 
 app.post('/login', (req, res) => {
-    const query = 'SELECT * FROM Admin WHERE username = ?';
+    const query = 'SELECT * FROM Admin WHERE username = ? AND isDeleted = 0';
     db.query(query, [req.body.username], (error, data) => {
         if(error) return res.json({Error: "Login error in server."})
         if(data.length > 0) {
@@ -96,6 +97,7 @@ app.get('/logout', (req, res) => {
 
 app.use('/items', ItemRouter)
 app.use('/branches', BranchRouter)
+app.use('/admins', AdminRouter)
 
 app.listen(8001, () => {
     console.log('Running in port 8001')

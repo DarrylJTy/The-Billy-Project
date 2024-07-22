@@ -12,7 +12,6 @@ function Branches() {
     const [selectedBranch, setSelectedBranch] = useState(null);
     const [branch_image, setBranchImage]  = useState(null)
     const [branchData, setBranchData] = useState({
-        branch_id: '',
         branch_name: '',
         branch_address: '',
         branch_contact: '',
@@ -32,15 +31,27 @@ function Branches() {
         }
     };
 
-    const handleShowModal = () => {
+    const handleShowModal = (branch) => {
+        if(branch) {
+            setIsUpdateMode(true);
+            setSelectedBranch(branch);
+            setBranchData({
+                branch_id: branch.branch_id,
+                branch_name: branch.branch_name,
+                branch_address: branch.branch_address,
+                branch_contact: branch.branch_contact,
+                branch_image: '',
+            })
+        } else {
+            setIsUpdateMode(false);
+            setBranchData({
+                branch_name: '',
+                branch_address: '',
+                branch_contact: '',
+                branch_image: '',
+            });
+        }
         setShowModal(true);
-        setBranchData({
-            branch_id: '',
-            branch_name: '',
-            branch_address: '',
-            branch_contact: '',
-            branch_image: '',
-        });
         setBranchImage(null); // Reset image
     };
 
@@ -63,12 +74,11 @@ function Branches() {
             }
 
             const updatedBranch = {
-                branch_id: updatedBranchData.branch_id !== '' ? updatedBranchData.branch_id : selectedBranch.branch_id, 
                 branch_name: updatedBranchData.branch_name !== '' ? updatedBranchData.branch_name : selectedBranch.branch_name,
                 branch_address: updatedBranchData.branch_address !== '' ? updatedBranchData.branch_address : selectedBranch.branch_address,
                 branch_contact: updatedBranchData.branch_contact !== '' ? updatedBranchData.branch_contact : selectedBranch.branch_contact,
                 branch_image: imageURL !== '' ? imageURL : selectedBranch.branch_image,
-                prev_branch_id: selectedBranch.branch_id,
+                branch_id: selectedBranch.branch_id
             };
 
             console.log("selected Image:", selectedBranch.branch_image);
@@ -83,23 +93,11 @@ function Branches() {
         }
     };
 
-    const handleEdit = (branch) => {
-        setIsUpdateMode(true); 
-        setSelectedBranch(branch);
-        setBranchData({
-            branch_id: branch.branch_id,
-            branch_name: branch.branch_name,
-            branch_address: branch.branch_address,
-            branch_contact: branch.branch_contact,
-            branch_image: branch.branch_image,
-        });
-        handleShowModal(); 
-    };
-
     const handleDelete = async (branch_id) => {
         try {
             await BranchService.deleteBranch(branch_id);
             console.log('Deleting branch with id:', branch_id);
+            alert('Branch and releted items have been flag as deleted.')
             fetchBranches(); 
         } catch (error) {
             console.error('Error deleting branch:', error);
@@ -179,7 +177,7 @@ function Branches() {
                                         <td>{branch.branch_address}</td>
                                         <td>{branch.branch_contact}</td>
                                         <td className='d-flex align-items-center justify-content-center'>
-                                            <Button variant="warning" onClick={() => handleEdit(branch)} className="m-1">Update</Button>
+                                            <Button variant="warning" onClick={() => handleShowModal(branch)} className="m-1">Update</Button>
                                             <Button variant="danger" onClick={() => handleDelete(branch.branch_id)}>Delete</Button>
                                         </td>
                                     </tr>
@@ -189,7 +187,7 @@ function Branches() {
                     </div>
 
                     <div className="text-center">
-                        <Button variant="success" onClick={handleShowModal} className="mt-2">
+                        <Button variant="success" onClick={() => handleShowModal(null)} className="mt-2">
                             Create Branch
                         </Button>
                     </div>
@@ -200,10 +198,6 @@ function Branches() {
                         </Modal.Header>
                         <Modal.Body>
                             <Form onSubmit={handleSubmit}>
-                                <Form.Group controlId="branchID">
-                                    <Form.Label>Branch ID</Form.Label>
-                                    <Form.Control type="text" name="branch_id" value={branchData.branch_id} onChange={handleTextChange} required={!isUpdateMode} autoComplete="off"/>
-                                </Form.Group>
                                 <Form.Group controlId="branchName">
                                     <Form.Label>Name</Form.Label>
                                     <Form.Control type="text" name="branch_name" value={branchData.branch_name} onChange={handleTextChange} required={!isUpdateMode} autoComplete="off"/>
@@ -222,7 +216,7 @@ function Branches() {
                                         type="file" 
                                         name="branch_image" 
                                         onChange={handleImageChange} 
-                                        required={!isUpdateMode} 
+                                        // required={!isUpdateMode} 
                                         accept="image/*"
                                     />
                                 </Form.Group>

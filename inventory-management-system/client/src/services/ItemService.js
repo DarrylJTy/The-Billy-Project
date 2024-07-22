@@ -6,6 +6,9 @@ const ItemService = {
     getAllItems: async () => {
         return await axios.get(API_URL);
     },
+    getAllWithDeleted: async () => {
+        return await axios.get(`${API_URL}/getALlWithDeleted`)
+    },
     getFromBranch: async (branch_id) => {
         return await axios.post(`${API_URL}/getFromBranch`, {branch_id})
     },

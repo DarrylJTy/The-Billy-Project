@@ -8,28 +8,37 @@ const ViewAll = () => {
     const [items, setItems] = useState([]);
     const [branches, setBranches] = useState([]);
     const [selectedBranch, setSelectedBranch] = useState('');
-    const [sortOrder, setSortOrder] = useState('asc'); // Only sorting state left
+    const [withDeleted, setWithDeleted] = useState(false);
 
     useEffect(() => {
         fetchItems();
         fetchBranches();
-    }, []);
+    }, [withDeleted]);
 
     const fetchItems = async () => {
         try {
-            const response = await ItemService.getAllItems();
-            setItems(response.data);
+            const response = withDeleted
+                ? await ItemService.getAllWithDeleted()
+                : await ItemService.getAllItems();
+            
+            // Sort items: non-deleted items first, then deleted items
+            const sortedItems = response.data.sort((a, b) => {
+                if (a.isDeleted === b.isDeleted) return 0;
+                return a.isDeleted ? 1 : -1;
+            });
+
+            setItems(sortedItems);
         } catch (error) {
             console.error('Error fetching items:', error);
         }
     };
 
     const fetchBranches = async () => {
-        try { 
-            const response = await BranchService.getAllBranches();
+        try {
+            const response = await BranchService.getAllBranchWithDeleted();
             setBranches(response.data);
         } catch (error) {
-            console.error('Error fetching branches: ', error);
+            console.error('Error fetching branches:', error);
         }
     };
 
@@ -42,15 +51,16 @@ const ViewAll = () => {
         setSelectedBranch(event.target.value);
     };
 
-
     const filteredItems = items.filter(item => {
-        // Apply branch filter if selected
         if (selectedBranch && item.branch_id.toString() !== selectedBranch) {
             return false;
         }
-        return true; // Show all if no filter selected
+        return true;
     });
 
+    const toggleWithDeleteItems = () => {
+        setWithDeleted(prevState => !prevState);
+    };
 
     return (
         <Layout>
@@ -64,9 +74,21 @@ const ViewAll = () => {
                                 <Form.Control as="select" defaultValue="" onChange={handleBranchFilterChange}>
                                     <option value="">All Branches</option>
                                     {branches.map(branch => (
-                                        <option key={branch.branch_id} value={branch.branch_id.toString()}>{branch.branch_name}</option>
+                                        <option key={branch.branch_id} value={branch.branch_id.toString()}>
+                                            {branch.branch_name}
+                                        </option>
                                     ))}
                                 </Form.Control>
+                            </Col>
+                            <Col md={3}>
+                                <Form.Label>&nbsp;</Form.Label> {/* This label is for spacing */}
+                                <div
+                                    onClick={toggleWithDeleteItems}
+                                    className="form-control"
+                                    style={{ cursor: 'pointer', textAlign: 'center' }}
+                                >
+                                    {withDeleted ? 'Hide Deleted Items' : 'Show Deleted Items'}
+                                </div>
                             </Col>
                         </Row>
                     </Form.Group>
@@ -82,6 +104,7 @@ const ViewAll = () => {
                                     <th>Quantity</th>
                                     <th>Price</th>
                                     <th>Branch</th>
+                                    {withDeleted && <th>Deleted</th>}
                                 </tr>
                             </thead>
                             <tbody>
@@ -95,7 +118,7 @@ const ViewAll = () => {
                                                     style={{ width: '100px', height: '100px', objectFit: 'cover' }} 
                                                 />
                                             ) : (
-                                                <span>No image uploaded</span> // or leave it empty: <span>&nbsp;</span>
+                                                <span>No image uploaded</span>
                                             )}
                                         </td>
                                         <td>{item.item_name}</td>
@@ -103,6 +126,15 @@ const ViewAll = () => {
                                         <td>{item.quantity}</td>
                                         <td>Php {item.price.toFixed(2)}</td>
                                         <td>{getBranchName(item.branch_id)}</td>
+                                        {withDeleted && (
+                                            <td>
+                                                <Form.Check 
+                                                    type="checkbox" 
+                                                    checked={item.isDeleted} 
+                                                    readOnly 
+                                                />
+                                            </td>
+                                        )}
                                     </tr>
                                 ))}
                             </tbody>

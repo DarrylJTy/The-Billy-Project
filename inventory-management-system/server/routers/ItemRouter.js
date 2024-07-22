@@ -49,9 +49,9 @@ ItemRouter.post("/create", (req, res) => {
 
 // Get all items
 ItemRouter.get("/", (req, res) => {
-    const selectQuery = "SELECT * FROM Item WHERE isDeleted = ?";
+    const selectQuery = "SELECT * FROM Item WHERE isDeleted = 0";
     
-    db.query(selectQuery, [0], (err, result) => {
+    db.query(selectQuery, (err, result) => {
         if (err) {
             console.error(err);
             return res.status(500).json({ error: "Failed to retrieve items" });
@@ -59,6 +59,17 @@ ItemRouter.get("/", (req, res) => {
         return res.status(200).json(result);
     });
 });
+
+ItemRouter.get("/getAllWithDeleted", (req, res) => {
+	const selectQuery = "SELECT * FROM Item";
+	db.query(selectQuery, (err, result) => {
+        if (err) {
+            console.error(err);
+            return res.status(500).json({ error: "Failed to retrieve items" });
+        }
+        return res.status(200).json(result);
+    });
+})
 
 
 // Get items from a specific branch

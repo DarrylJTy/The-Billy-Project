@@ -9,6 +9,9 @@ const BranchService = {
     getAllBranches: async () => {
         return await axios.get(`${API_URL}/getBranches`);
     },
+    getAllBranchWithDeleted: async () => {
+        return await axios.get(`${API_URL}/getBranchesWithDeleted`);
+    },
     getSpecificBranchName: async (branch_id) => {
         return await axios.post(`${API_URL}/getSpecificBranchName`, {branch_id});
     },

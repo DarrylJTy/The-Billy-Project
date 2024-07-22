@@ -68,16 +68,31 @@ const ViewItems = () => {
         }
     };
 
-    const handleShowModal = () => {
+    const handleShowModal = (item) => {
+        if(item) {
+            setIsUpdateMode(true);
+            setSelectedItem(item);
+            setItemData({
+                item_name: item.item_name,
+                description: item.description,
+                size: item.size,
+                quantity: item.quantity,
+                price: item.price,
+                item_image: '',
+            })
+        } else {
+            setIsUpdateMode(false);
+            setItemData({
+                item_name: '',
+                description: '',
+                size: '',
+                quantity: '',
+                price: '',
+                item_image: '',
+            });
+        }
+        
         setShowModal(true);
-        setItemData({
-            item_name: '',
-            description: '',
-            size: '',
-            quantity: '',
-            price: '',
-            item_image: '',
-        });
         setItemImage(null); // Reset image
     };
 
@@ -132,21 +147,6 @@ const ViewItems = () => {
         } catch (error) {
             console.error('Error updating item:', error);
         }
-    };
-
-    const handleEdit = (item) => {
-        setIsUpdateMode(true); 
-        setSelectedItem(item);
-        setItemData({
-            item_name: item.item_name,
-            description: item.description,
-            size: item.size,
-            quantity: item.quantity,
-            price: item.price,
-            item_image: item.item_image,
-            branch_id: branch_id,
-        });
-        handleShowModal(); 
     };
     
     const handleSubmit = async (e) => {
@@ -231,7 +231,7 @@ const ViewItems = () => {
                                         <td>{item.quantity}</td>
                                         <td>Php {item.price.toFixed(2)}</td>
                                         <td className='d-flex align-items-center justify-content-center'>
-                                            <Button variant="warning" onClick={() => handleEdit(item)} className="m-1">Update</Button>
+                                            <Button variant="warning" onClick={() => handleShowModal(item)} className="m-1">Update</Button>
                                             <Button variant="danger" onClick={() => handleDelete(item.item_id)}>Delete</Button>
                                         </td>
                                     </tr>
@@ -241,7 +241,7 @@ const ViewItems = () => {
                     </div>
 
                     <div className="text-center">
-                        <Button variant="success" onClick={handleShowModal} className="mt-2">
+                        <Button variant="success" onClick={() => handleShowModal(null)} className="mt-2">
                             Create Item
                         </Button>
                     </div>
@@ -278,7 +278,6 @@ const ViewItems = () => {
                                         type="file" 
                                         name="item_image" 
                                         onChange={handleImageChange} 
-                                        required={!isUpdateMode} 
                                         accept="image/*"
                                     />
                                 </Form.Group>

@@ -9,9 +9,11 @@ import {
 } from "cdbreact";
 import { NavLink } from "react-router-dom";
 import TokenDecoder from "../services/TokenDecoder";
+import BranchService from "../services/BranchService";
 
 const Sidebar = () => {
 	const [isMasterAdmin, setIsMasterAdmin] = useState(false);
+	const [branchName, setBranchName] = useState(null);
 
 	useEffect(() => {
 		const checkAdminStatus = async () => {
@@ -21,14 +23,20 @@ const Sidebar = () => {
 			}
 			
 		};
+		const checkBranchName = async () => {
+			const branchID = await TokenDecoder.getBranchId();
+			const branch = await BranchService.getSpecificBranchName(branchID);
+			setBranchName(branch.data[0].branch_name)
+		}
 		checkAdminStatus();
+		checkBranchName();
 	}, []);
 
 	const showMenuItems = () => { // Responsible for showing menu items only master admin can see
 		if (isMasterAdmin) {
 			return (
 				<>
-					<NavLink exact to="/404" activeClassName="activeClicked">
+					<NavLink exact to="/admins" activeClassName="activeClicked">
 						<CDBSidebarMenuItem icon="user">
 							Admins
 						</CDBSidebarMenuItem>
@@ -41,7 +49,11 @@ const Sidebar = () => {
 				</>
 			);
 		}
-		return <></>;
+		return (
+			<>	
+				{/* Return Reservations for specific branch */}
+			</>
+		);
 	};
 
 	return (
@@ -60,7 +72,7 @@ const Sidebar = () => {
 						className="text-decoration-none"
 						style={{ color: "inherit" }}
 					>
-						Mr Billy
+						Mr Billy 
 					</a>
 				</CDBSidebarHeader>
 
@@ -92,7 +104,7 @@ const Sidebar = () => {
 							padding: "20px 5px",
 						}}
 					>
-						Inventory
+						{!isMasterAdmin ? branchName: "Master Admin"}
 					</div>
 				</CDBSidebarFooter>
 			</CDBSidebar>
