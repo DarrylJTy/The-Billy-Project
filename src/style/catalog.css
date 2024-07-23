@@ -1,0 +1,52 @@
+.filter-container {
+    border-right: 1px solid #999696;
+    padding-top: 25px;
+}
+
+.filter-text-column > h2{
+    color:black;
+    font-size: 32px;    
+}
+
+.checkbox-label {
+    color: black;
+}
+
+.tiles-container {
+    padding: 0.3125rem 7.5rem !important;
+}
+
+.product-title > h3 {
+    color: black;
+    font-size: 40px; 
+}
+
+.product-title {
+    padding-bottom: 30px;
+}
+
+.item-link {
+    text-decoration: none !important;
+}
+
+.category-button {
+    background: none;
+    border: none;
+    color: black !important;
+    padding: 0;
+    text-align: left;
+    font-size: 1rem;
+    background-color: transparent !important;
+  }
+  
+  .category-button:hover,
+  .category-button:focus {
+    text-decoration: none;
+    outline: none;
+    background-color: transparent !important;
+  }
+  
+  .category-button.selected {
+    font-weight: bold;
+    background-color: transparent !important;
+  }

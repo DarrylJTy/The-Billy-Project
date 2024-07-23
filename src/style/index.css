@@ -1,0 +1,40 @@
+.first-content-block, .branches-area, .review-area {
+    height: 31rem;
+    background-color: #FFDEDE;
+    padding: 0.3125rem;
+    margin: 0.3125rem; 
+}
+
+.text-area, .branches-area, .review-area {
+    padding: 0.3125rem;
+    align-items: center;
+    display: flex;
+}
+
+.text-content, .branches-content, .review-content {
+    color: black;
+    padding: 24px;
+}
+
+.index-container {
+    padding: 0.3125rem 7.5rem !important;
+}
+
+.button1, .button2, .button3 {
+    background-color: white;
+}   
+
+.text-content > h2{
+    font-size: 75px;
+}
+
+h2{
+    font-size: 64px;
+    color: black;
+}
+
+p{
+    font: 300;
+    font-size: 20px;
+    color: black;
+}
