@@ -6,8 +6,8 @@ import cookieParser from 'cookie-parser';
 import db from './db.js'
 import {config} from 'dotenv';
 const saltRounds = 10;
-import {ItemRouter} from '../server/routers/ItemRouter.js'
-import {BranchRouter} from '../server/routers/BranchRouter.js'
+import {ItemRouter} from './routers/ItemRouter.js'
+import {BranchRouter} from './routers/BranchRouter.js'
 import { AdminRouter } from './routers/AdminRouter.js';
 
 const app = express();
