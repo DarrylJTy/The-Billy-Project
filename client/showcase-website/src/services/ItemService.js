@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const API_URL = 'http://localhost:8001/items'; // Replace with your backend API URL
+const API_URL = `${process.env.GATSBY_SERVER_URL}/items`; // Replace with your backend API URL
 
 const ItemService = {
     getAllItems: async () => {

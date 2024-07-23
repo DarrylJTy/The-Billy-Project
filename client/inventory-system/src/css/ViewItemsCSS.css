@@ -1,0 +1,13 @@
+.table-container {
+    position: relative;
+    overflow-y: auto;
+    max-height: 500px; /* Adjust based on your needs */
+}
+
+.table-fixed thead th {
+    position: -webkit-sticky; /* For Safari */
+    position: sticky;
+    top: 0;
+    background-color: #f8f9fa; /* Match your table's background */
+    z-index: 1; /* Ensure header is above other content */
+}

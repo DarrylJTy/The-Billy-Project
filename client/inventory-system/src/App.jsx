@@ -29,7 +29,6 @@ export default function App() {
         {/* Public Routes */}
         {!token && (
           <>
-            <Route path='/' element={<Home />} />
             <Route path="/404" element={<NotFound />} exact />
             <Route path='/register' element={<Register />} />
             <Route path='/login' element={<Login />} />
@@ -38,9 +37,9 @@ export default function App() {
 
         {/* Protected Routes */} 
         <Route element={<ProtectedRoute />}> {/* Master Admin Protected*/ }
-          <Route path='/' element={<Home />} />
-          <Route path="/login" element={<Navigate to="/" />} />
-          <Route path="/register" element={<Navigate to="/" />} />
+          <Route path='/' element={<Navigate to="viewitems" />} />
+          <Route path="/login" element={<Navigate to="/viewitems" />} />
+          <Route path="/register" element={<Navigate to="/viewitems" />} />
           <Route path="/404" element={<NotFound />} exact />
         {!isMasterAdmin ? (
             <>

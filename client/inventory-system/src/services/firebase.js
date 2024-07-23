@@ -4,13 +4,16 @@ import { getStorage } from "firebase/storage";
 
 // Your web app's Firebase configuration
 const firebaseConfig = {
-  apiKey: "AIzaSyASfjTHproZWOm7kEfOG6cKB4dhdyulUJ8",
-  authDomain: "the-billy-imgdb.firebaseapp.com",
-  projectId: "the-billy-imgdb",
-  storageBucket: "the-billy-imgdb.appspot.com",
-  messagingSenderId: "225284718307",
-  appId: "1:225284718307:web:998853924585a149e94fd6"
+  apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
+  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
+  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
+  storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
+  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
+  appId: import.meta.env.VITE_FIREBASE_APP_ID,
 };
+
+export default firebaseConfig;
+
 
 // Initialize Firebase
 const firebaseApp = initializeApp(firebaseConfig);

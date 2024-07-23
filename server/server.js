@@ -13,7 +13,7 @@ import { AdminRouter } from './routers/AdminRouter.js';
 const app = express();
 app.use(express.json());
 app.use(cors({
-    origin: ["http://localhost:5173", "http://localhost:3000"],
+    origin: [process.env.INVENTORY_URL, process.env.SHOWCASE_URL],
     methods: ["POST", "GET"],
     credentials: true
 }));

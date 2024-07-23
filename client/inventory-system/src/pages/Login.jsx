@@ -14,7 +14,7 @@ function Login() {
 	const navigate = useNavigate();
     const handleSubmit = (event) => {
         event.preventDefault();
-        axios.post('http://localhost:8001/login', values)
+        axios.post(`${import.meta.env.VITE_SERVER_URL}/login`, values)
         .then(res => {
             if(res.data.Status === "Success") {
 				navigate("/viewitems");

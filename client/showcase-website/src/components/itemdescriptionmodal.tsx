@@ -20,13 +20,9 @@ const itemdescriptionmodal = ({ show, handleClose, item }) => {
           <div className="modal-details">
             <p><strong>Description:</strong> {item.description}</p>
             <p><strong>Stock:</strong> {item.quantity > 0 ? 'In Stock' : 'Out of Stock'}</p>
-            {/* <p><strong>Size Options:</strong></p>
-            <ul>
-              {item.size_options.map((size, index) => (
-                <li key={index}>{size}</li>
-              ))}
-            </ul> */}
-            <p><strong>Price:</strong> ₱{item.price.toFixed(2)}</p>
+            <p><strong>Size Options:</strong> {item.sizes}</p>
+            <p><strong>Price:</strong> ₱{item.price.toFixed(2)} </p>
+            <p>*prices may change with or without prior announcement*</p>
           </div>
         </div>
       </Modal.Body>

@@ -4,52 +4,83 @@ import db from "../db.js";
 const ItemRouter = express.Router();
 
 // Create an item
-ItemRouter.post("/create", (req, res) => {
-	const {
-		item_name,
-		description,
-		size,
-		quantity,
-		price,
-		branch_id,
-		item_image,
-	} = req.body;
-	const created_at = new Date();
-	const updated_at = new Date();
-	console.log(req.body);
+ItemRouter.post("/create", async (req, res) => {
+    const {
+        item_name,
+        description,
+        sizes, // array of size dimensions as strings
+		category,
+        quantity,
+        price,
+        branch_id,
+        item_image,
+    } = req.body;
+    const created_at = new Date();
+    const updated_at = new Date();
 
-	const insertQuery =
-		"INSERT INTO Item (item_name, description, size, quantity, price, created_at, updated_at, branch_id, item_image) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
-	db.query(
-		insertQuery,
-		[
-			item_name,
-			description,
-			size,
-			quantity,
-			price,
-			created_at,
-			updated_at,
-			branch_id,
-			item_image,
-		],
-		(err, result) => {
-			if (err) {
-				console.error(err);
-				return res
-					.status(500)
-					.json({ error: "Failed to create item" });
+	let item_id = '';
+
+    try {
+        // Insert into Item table
+        const insertItemQuery =
+            "INSERT INTO Item (item_name, description, category, quantity, price, created_at, updated_at, branch_id, item_image) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
+        
+			await db.query(insertItemQuery, [
+				item_name,
+				description,
+				category,
+				quantity,
+				price,
+				created_at,
+				updated_at,
+				branch_id,
+				item_image,
+			],
+			(err, results) => {
+				if(err) {
+					console.error("Query Error:", err);
+				} else {
+					item_id = results.insertId;
+				}
 			}
-			return res
-				.status(201)
-				.json({ message: "Item created successfully" });
-		}
-	);
+		);
+
+        // Retrieve size_ids for each size_description
+        const itemSizes = sizes ? sizes.split(',') : [];
+
+        const sizeQueries = itemSizes.map(size_description => {
+            return new Promise(async (resolve, reject) => {
+                try {
+                    await db.query('SELECT size_id FROM Size WHERE size_dimension = ?', [size_description], 
+						(err, sizeResult) => {
+							if (sizeResult.length > 0) {
+								const size_id = sizeResult[0].size_id;
+								const insertSizeQuery = 'INSERT INTO Item_Size (item_id, size_id) VALUES (?, ?)';
+								resolve( db.query(insertSizeQuery, [item_id, size_id]));
+							} else {
+								reject(new Error(`Size dimension ${size_description} not found`));
+							}
+						}
+					);
+                } catch (error) {
+                    reject(error);
+                }
+            });
+        });
+
+        await Promise.all(sizeQueries);
+
+        res.status(201).json({ message: "Item created successfully" });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: "Failed to create item" });
+    }
 });
 
-// Get all items without deleted
+// Get all items with sizes
 ItemRouter.get("/", (req, res) => {
-    const selectQuery = "SELECT * FROM Item WHERE isDeleted = 0";
+    const selectQuery =
+        "SELECT Item.*, GROUP_CONCAT(Size.size_dimension) AS sizes FROM Item LEFT JOIN Item_Size ON Item.item_id = Item_Size.item_id LEFT JOIN Size ON Item_Size.size_id = Size.size_id WHERE Item.isDeleted = 0 GROUP BY Item.item_id";
     
     db.query(selectQuery, (err, result) => {
         if (err) {
@@ -60,10 +91,12 @@ ItemRouter.get("/", (req, res) => {
     });
 });
 
-// Get all items 
+// Get all items including deleted
 ItemRouter.get("/getAllWithDeleted", (req, res) => {
-	const selectQuery = "SELECT * FROM Item";
-	db.query(selectQuery, (err, result) => {
+    const selectQuery =
+        "SELECT Item.*, GROUP_CONCAT(Size.size_dimension) AS sizes FROM Item LEFT JOIN Item_Size ON Item.item_id = Item_Size.item_id LEFT JOIN Size ON Item_Size.size_id = Size.size_id GROUP BY Item.item_id";
+
+    db.query(selectQuery, (err, result) => {
         if (err) {
             console.error(err);
             return res.status(500).json({ error: "Failed to retrieve items" });
@@ -72,29 +105,30 @@ ItemRouter.get("/getAllWithDeleted", (req, res) => {
     });
 });
 
-// Get item by id
-ItemRouter.get("/:item_id", (req, res) => {
-	const item_id = req.params.item_id;
-	const selectQuery = "SELECT * FROM Item WHERE item_id = ? AND isDeleted = 0";
-  
-	db.query(selectQuery, [item_id], (err, result) => {
-	  if (err) {
-		console.error(err);
-		return res.status(500).json({ error: "Failed to retrieve item" });
-	  }
-	  if (result.length === 0) {
-		return res.status(404).json({ error: "Item not found" });
-	  }
-	  return res.status(200).json(result[0]);
-	});
-  });
+// // Get item by id with sizes
+// ItemRouter.get("/:item_id", (req, res) => {
+//     const item_id = req.params.item_id;
+//     const selectQuery =
+//         "SELECT Item.*, GROUP_CONCAT(Size.size_dimension) AS sizes FROM Item LEFT JOIN Item_Size ON Item.item_id = Item_Size.item_id LEFT JOIN Size ON Item_Size.size_id = Size.size_id WHERE Item.item_id = ? AND Item.isDeleted = 0 GROUP BY Item.item_id";
 
+//     db.query(selectQuery, [item_id], (err, result) => {
+//         if (err) {
+//             console.error(err);
+//             return res.status(500).json({ error: "Failed to retrieve item" });
+//         }
+//         if (result.length === 0) {
+//             return res.status(404).json({ error: "Item not found" });
+//         }
+//         return res.status(200).json(result[0]);
+//     });
+// });
 
 // Get items from a specific branch
 ItemRouter.post("/getFromBranch", (req, res) => {
-    const selectQuery = "SELECT * FROM Item WHERE branch_id = ? AND isDeleted = ?";
+    const selectQuery =
+        "SELECT Item.*, GROUP_CONCAT(Size.size_dimension) AS sizes FROM Item LEFT JOIN Item_Size ON Item.item_id = Item_Size.item_id LEFT JOIN Size ON Item_Size.size_id = Size.size_id WHERE Item.branch_id = ? AND Item.isDeleted = 0 GROUP BY Item.item_id";
     
-    db.query(selectQuery, [req.body.branch_id, 0], (err, result) => {
+    db.query(selectQuery, [req.body.branch_id], (err, result) => {
         if (err) {
             console.error(err);
             return res.status(500).json({ error: "Failed to retrieve items" });
@@ -103,63 +137,136 @@ ItemRouter.post("/getFromBranch", (req, res) => {
     });
 });
 
+const getInitialSizes = async (item_id) => {
+    return new Promise((resolve, reject) => {
+        db.query(`
+            SELECT GROUP_CONCAT(Size.size_dimension) AS sizes 
+            FROM Item 
+            LEFT JOIN Item_Size ON Item.item_id = Item_Size.item_id 
+            LEFT JOIN Size ON Item_Size.size_id = Size.size_id 
+            WHERE Item.item_id = ?`, 
+            [item_id], 
+            (err, results) => {
+                if (err) {
+                    console.error('Query Error:', err);
+                    return reject(err);
+                }
+        
+                // Access the sizes string
+                const initialSizesString = results[0].sizes;
+        
+                // Convert the string to an array if needed
+                const initialSizesArray = initialSizesString ? initialSizesString.split(',') : [];
+        
+                resolve(initialSizesArray);
+            }
+        );
+    });
+};
 
-// Update an item
-ItemRouter.post("/update", (req, res) => {
-	const {
-		item_name,
-		description,
-		size,
-		quantity,
-		price,
-		item_image,
-		branch_id,
-		item_id,
-	} = req.body;
-	const updated_at = new Date();
+ItemRouter.post('/update', async (req, res) => {
+    const {
+        item_id,
+        item_name,
+        description,
+		category,
+        quantity,
+        price,
+        item_image,
+        sizes
+    } = req.body;
 
-	const updateQuery =
-		"UPDATE Item SET item_name = ?, description = ?, size = ?, quantity = ?, price = ?, item_image = ?, updated_at = ?, branch_id = ? WHERE item_id = ?";
-	db.query(
-		updateQuery,
-		[
-			item_name,
-			description,
-			size,
-			quantity,
-			price,
-			item_image,
-			updated_at,
-			branch_id,
-			item_id,
-		],
-		(err, result) => {
-			if (err) {
-				console.error(err);
-				return res
-					.status(500)
-					.json({ error: "Failed to update item" });
-			}
-			return res
-				.status(200)
-				.json({ message: "Item updated successfully" });
-		}
-	);
+    try {
+        // Update Item table
+        const updateItemQuery = `
+            UPDATE Item SET item_name = ?, description = ?, category = ?, quantity = ?, price = ?, item_image = ? 
+            WHERE item_id = ?`;
+        await db.query(updateItemQuery, [
+            item_name,
+            description,
+			category,
+            quantity,
+            price,
+            item_image,
+            item_id
+        ]);
+
+		// Get initial sizes from the database
+        const initialSizesArray = await getInitialSizes(item_id);
+
+        // Split updated sizes into an array
+        const updatedSizesArray = sizes ? sizes.split(',').map(size => size.trim()) : [];
+
+        // Find sizes to delete (initial sizes not in updated sizes)
+        const sizesToDelete = initialSizesArray.filter(sizes => !updatedSizesArray.includes(sizes));
+
+        // Find sizes to add (updated sizes not in initial sizes)
+        const sizesToAdd = updatedSizesArray.filter(size => !initialSizesArray.includes(size));
+		console.log("sizes to add:", sizesToAdd)
+
+        // Remove sizes
+        if (sizesToDelete.length > 0) {
+            const deleteSizesQuery = `
+                DELETE FROM Item_Size 
+                WHERE item_id = ? AND size_id IN (
+                    SELECT size_id FROM Size WHERE size_dimension IN (?)
+                )`;
+            await db.query(deleteSizesQuery, [item_id, sizesToDelete]);
+        }
+
+        // Add new sizes
+        if (sizesToAdd.length > 0) {
+            const insertPromises = sizesToAdd.map(async size => {
+                // Get the size_id for the size
+                await db.query('SELECT size_id FROM Size WHERE size_dimension = ?', [size], 
+					(err, results) => {
+						if(err) {
+							console.error("Query Error:", err);
+						} else {
+							if(results.length > 0) {
+								const size_id = results[0].size_id
+								const insertSizeQuery = 'INSERT INTO Item_Size (item_id, size_id) VALUES (?, ?)';
+                    			return db.query(insertSizeQuery, [item_id, size_id]);
+							}
+						}
+					}
+				);
+            });
+            await Promise.all(insertPromises);
+        }
+
+        res.status(200).json({ message: 'Item updated successfully' });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: 'Failed to update item' });
+    }
 });
+
 
 // Delete an item
 ItemRouter.post("/delete", (req, res) => {
-	const item_id = req.body.item_id;
-	const deleteQuery = "UPDATE Item SET isDeleted = ? WHERE item_id = ?";
-	db.query(deleteQuery, [true, item_id], (err, result) => {
-		if (err) {
-			console.error(err);
-			return res.status(500).json({ error: "Failed to delete item" });
-		}
-		return res
-			.status(200)
-			.json({ message: "Item deleted successfully" });
-	});
+    const item_id = req.body.item_id;
+    const deleteQuery = "UPDATE Item SET isDeleted = ? WHERE item_id = ?";
+    db.query(deleteQuery, [true, item_id], (err, result) => {
+        if (err) {
+            console.error(err);
+            return res.status(500).json({ error: "Failed to delete item" });
+        }
+        return res.status(200).json({ message: "Item deleted successfully" });
+    });
 });
 
-export {ItemRouter};
+// Get all sizes
+ItemRouter.get("/sizes", (req, res) => {
+    const selectQuery = "SELECT * FROM Size";
+
+    db.query(selectQuery, (err, result) => {
+        if (err) {
+            console.error(err);
+            return res.status(500).json({ error: "Failed to retrieve sizes" });
+        }
+        return res.status(200).json(result);
+    });
+});
+
+export { ItemRouter };

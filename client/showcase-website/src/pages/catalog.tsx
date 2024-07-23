@@ -37,13 +37,23 @@ export default function Catalog() {
     setSelectedItem(null);
   };
 
-  const filteredItems = items.filter(
-    (item) => item.category === selectedCategory
+  // Function to remove duplicate items based on name
+  const removeDuplicateItems = (items) => {
+    const seen = new Set();
+    return items.filter(item => {
+      const isDuplicate = seen.has(item.item_name);
+      seen.add(item.item_name);
+      return !isDuplicate;
+    });
+  };
+
+  const filteredItems = removeDuplicateItems(
+    items.filter(item => item.category === selectedCategory.toLowerCase())
   );
 
   const chunkedItems = [];
-  for (let i = 0; i < items.length; i += 5) {
-    chunkedItems.push(items.slice(i, i + 5));
+  for (let i = 0; i < filteredItems.length; i += 5) {
+    chunkedItems.push(filteredItems.slice(i, i + 5));
   }
 
   return (
