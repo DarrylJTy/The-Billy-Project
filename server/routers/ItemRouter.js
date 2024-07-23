@@ -47,7 +47,7 @@ ItemRouter.post("/create", (req, res) => {
 	);
 });
 
-// Get all items
+// Get all items without deleted
 ItemRouter.get("/", (req, res) => {
     const selectQuery = "SELECT * FROM Item WHERE isDeleted = 0";
     
@@ -60,6 +60,7 @@ ItemRouter.get("/", (req, res) => {
     });
 });
 
+// Get all items 
 ItemRouter.get("/getAllWithDeleted", (req, res) => {
 	const selectQuery = "SELECT * FROM Item";
 	db.query(selectQuery, (err, result) => {
@@ -69,7 +70,24 @@ ItemRouter.get("/getAllWithDeleted", (req, res) => {
         }
         return res.status(200).json(result);
     });
-})
+});
+
+// Get item by id
+ItemRouter.get("/:item_id", (req, res) => {
+	const item_id = req.params.item_id;
+	const selectQuery = "SELECT * FROM Item WHERE item_id = ? AND isDeleted = 0";
+  
+	db.query(selectQuery, [item_id], (err, result) => {
+	  if (err) {
+		console.error(err);
+		return res.status(500).json({ error: "Failed to retrieve item" });
+	  }
+	  if (result.length === 0) {
+		return res.status(404).json({ error: "Item not found" });
+	  }
+	  return res.status(200).json(result[0]);
+	});
+  });
 
 
 // Get items from a specific branch

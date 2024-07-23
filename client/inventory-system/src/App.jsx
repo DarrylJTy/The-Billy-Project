@@ -7,7 +7,7 @@ import ViewItems from "./components/ViewItems";
 import ViewAll from "./components/ViewAll";
 import NotFound from './pages/404';
 import TokenDecoder from "./services/TokenDecoder";
-import ProtectedRoute from "../utils/ProtectedRoutes";
+import ProtectedRoute from "./utils/ProtectedRoutes"
 import Branches from "./components/Branches";
 import Admins from "./components/Admins";
 

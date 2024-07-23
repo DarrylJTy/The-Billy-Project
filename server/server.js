@@ -13,7 +13,7 @@ import { AdminRouter } from './routers/AdminRouter.js';
 const app = express();
 app.use(express.json());
 app.use(cors({
-    origin: ["http://localhost:5173"],
+    origin: ["http://localhost:5173", "http://localhost:3000"],
     methods: ["POST", "GET"],
     credentials: true
 }));
@@ -38,7 +38,7 @@ const verifyUser = (req, res, next) => {
     }
 }
 
-app.get('/', verifyUser, (req, res) => {
+app.get('/verify', verifyUser, (req, res) => {
     return res.json({Status: "Success", username: req.admin.username})
 })
 

@@ -1,0 +1,17 @@
+.custom-card {
+    width: auto; /* Adjusts the card width to fit the image */
+    border: 2px solid black;
+    margin: 5px;
+  }
+  
+  .custom-card .card-img-top {
+    width: 100%;
+    height: auto;
+  }
+  
+  .custom-card .card-title {
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+    white-space: normal;
+  }
+  
