@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const API_URL = 'http://localhost:8001/admins'; // backend API URL
+const API_URL = `${import.meta.env.VITE_SERVER_URL}/admins`; // backend API URL
 
 const AdminService = {
     getAllAdmins: async () => {

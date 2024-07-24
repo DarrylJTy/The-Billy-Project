@@ -3,6 +3,7 @@ import { Table, Button, Form, Row, Col } from 'react-bootstrap';
 import ItemService from '../services/ItemService';
 import BranchService from '../services/BranchService';
 import Layout from './Layout';
+import '../css/ViewItemsCSS.css';
 
 const ViewAll = () => {
     const [items, setItems] = useState([]);
@@ -93,14 +94,16 @@ const ViewAll = () => {
                         </Row>
                     </Form.Group>
 
-                    <div style={{ maxHeight: '500px', overflowY: 'auto' }}>
-                        <Table striped bordered hover>
+                    <div style={{ maxHeight: '500px', overflowY: 'auto' }} className="table-container">
+                        <Table striped bordered hover className="table-fixed">
                             <thead>
                                 <tr>
                                     <th>#</th>
                                     <th>Photo</th>
                                     <th>Name</th>
                                     <th>Description</th>
+                                    <th>Sizes</th>
+                                    <th>Category</th>
                                     <th>Quantity</th>
                                     <th>Price</th>
                                     <th>Branch</th>
@@ -123,6 +126,8 @@ const ViewAll = () => {
                                         </td>
                                         <td>{item.item_name}</td>
                                         <td>{item.description}</td>
+                                        <td>{item.category}</td>
+                                        <td>{item.sizes ? item.sizes : 'N/A'}</td>
                                         <td>{item.quantity}</td>
                                         <td>Php {item.price.toFixed(2)}</td>
                                         <td>{getBranchName(item.branch_id)}</td>

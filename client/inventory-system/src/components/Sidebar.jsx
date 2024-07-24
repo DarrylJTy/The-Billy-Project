@@ -7,9 +7,10 @@ import {
 	CDBSidebarMenu,
 	CDBSidebarMenuItem,
 } from "cdbreact";
-import { NavLink } from "react-router-dom";
+import { NavLink, useNavigate } from "react-router-dom";
 import TokenDecoder from "../services/TokenDecoder";
 import BranchService from "../services/BranchService";
+import axios from "axios";
 
 const Sidebar = () => {
 	const [isMasterAdmin, setIsMasterAdmin] = useState(false);
@@ -31,6 +32,14 @@ const Sidebar = () => {
 		checkAdminStatus();
 		checkBranchName();
 	}, []);
+
+
+	const handleLogout = async () => {
+		await axios.get(`${import.meta.env.VITE_SERVER_URL}/logout`, { withCredentials: true})
+		.then(res => {
+			location.reload(true);
+		}).catch(err => console.log(err));
+    };
 
 	const showMenuItems = () => { // Responsible for showing menu items only master admin can see
 		if (isMasterAdmin) {
@@ -78,7 +87,7 @@ const Sidebar = () => {
 
 				<CDBSidebarContent className="sidebar-content">
 					<CDBSidebarMenu>
-						<NavLink exact to="/" activeClassName="activeClicked">
+						<NavLink exact to="/dashboard" activeClassName="activeClicked">
 							<CDBSidebarMenuItem icon="columns">
 								Dashboard
 							</CDBSidebarMenuItem>
@@ -93,6 +102,9 @@ const Sidebar = () => {
 							</CDBSidebarMenuItem>
 						</NavLink>
 						{showMenuItems()}
+						<CDBSidebarMenuItem icon="sign-out-alt" onClick={handleLogout}>
+                            Logout
+                        </CDBSidebarMenuItem>
 						<hr/>
 
 					</CDBSidebarMenu>

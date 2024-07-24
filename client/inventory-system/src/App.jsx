@@ -7,9 +7,10 @@ import ViewItems from "./components/ViewItems";
 import ViewAll from "./components/ViewAll";
 import NotFound from './pages/404';
 import TokenDecoder from "./services/TokenDecoder";
-import ProtectedRoute from "../utils/ProtectedRoutes";
+import ProtectedRoute from "./utils/ProtectedRoutes"
 import Branches from "./components/Branches";
 import Admins from "./components/Admins";
+import Dashboard from "./pages/Dashboard";
 
 export default function App() {
   const token = document.cookie;
@@ -29,8 +30,7 @@ export default function App() {
         {/* Public Routes */}
         {!token && (
           <>
-            <Route path='/' element={<Home />} />
-            <Route path="/404" element={<NotFound />} exact />
+            <Route path='/' element={<Navigate to="/login" />} />
             <Route path='/register' element={<Register />} />
             <Route path='/login' element={<Login />} />
           </>
@@ -38,14 +38,17 @@ export default function App() {
 
         {/* Protected Routes */} 
         <Route element={<ProtectedRoute />}> {/* Master Admin Protected*/ }
-          <Route path='/' element={<Home />} />
-          <Route path="/login" element={<Navigate to="/" />} />
-          <Route path="/register" element={<Navigate to="/" />} />
+          <Route path="/" element={<Navigate to="/dashboard" />} />
+          <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/login" element={<Navigate to="/viewitems" />} />
+          <Route path="/register" element={<Navigate to="/viewitems" />} />
           <Route path="/404" element={<NotFound />} exact />
         {!isMasterAdmin ? (
             <>
               <Route path="/viewitems" element={<ViewItems />}/>
               <Route path="/viewallitems" element={<Navigate to="/viewitems" />}/>
+              <Route path="/branches" element={<Navigate to="/viewitems"/>}/>
+              <Route path="/admins" element={<Navigate to="/viewitems" />} />
             </>
         ): (
           
@@ -59,7 +62,8 @@ export default function App() {
         </Route>
         
 
-        {/* Add more routes as needed */}
+        <Route path="/404" element={<NotFound />} />
+        <Route path="*" element={<Navigate to="/404" />} />
       </Routes>
     </BrowserRouter>
   );

@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const API_URL = 'http://localhost:8001/branches'; // backend API URL
+const API_URL = `${import.meta.env.VITE_SERVER_URL}/branches`; // backend API URL
 
 const BranchService = {
     createBranch: async (branchData) => {
