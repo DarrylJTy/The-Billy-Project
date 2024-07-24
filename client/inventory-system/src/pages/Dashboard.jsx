@@ -91,8 +91,6 @@ function Dashboard() {
     const fetchTopItems = async () => {
       try {
         const response = await ItemService.getTopItems(branch_id, isMasterAdmin);
-
-        console.log(response.data)
         const items = response.data;
 
         const labels = items.map(item => item.item_name);

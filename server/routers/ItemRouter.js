@@ -202,7 +202,6 @@ ItemRouter.post('/update', async (req, res) => {
 
         // Find sizes to add (updated sizes not in initial sizes)
         const sizesToAdd = updatedSizesArray.filter(size => !initialSizesArray.includes(size));
-		console.log("sizes to add:", sizesToAdd)
 
         // Remove sizes
         if (sizesToDelete.length > 0) {
@@ -389,7 +388,6 @@ ItemRouter.post("/totalOutOfStockInBranch", (req, res) => {
 ItemRouter.post("/topItems", async (req, res) => {
     const branch_id = req.body.branch_id;
     const isMasterAdmin = req.body.isMasterAdmin;
-    console.log(isMasterAdmin)
     let selectQuery;
 
     if (isMasterAdmin) {
