@@ -75,10 +75,15 @@ app.post('/login', (req, res) => {
                     role: data[0].role,
                     branch_id: data[0].branch_id
                 };
-                const token = jwt.sign(admin, process.env.JWT_SECRET, {expiresIn: '1h'}) // change this to a private key in an .env file
+                const token = jwt.sign(admin, process.env.JWT_SECRET, {expiresIn: '2h'})
                 
-                res.cookie('token', token);
+                const now = new Date();
+                const expireDate = new Date(now.getTime() + 2 * 60 * 60 * 1000); // 2 hours from now
 
+                res.cookie('token', token, {
+                        expires: expireDate,
+                });
+                
                 return res.json({Status: "Success"});
             } else {
                 return res.json({Error: "Incorrect Password."});

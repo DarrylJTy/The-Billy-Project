@@ -269,4 +269,188 @@ ItemRouter.get("/sizes", (req, res) => {
     });
 });
 
+// Get total products in a branch
+ItemRouter.post("/totalProductsInBranch", (req, res) => {
+    const branch_id = req.body.branch_id;
+    const isMasterAdmin = req.body.isMasterAdmin;
+    let selectQuery;
+
+    if (isMasterAdmin) {
+        selectQuery = `
+            SELECT COUNT(item_id) AS total_products
+            FROM Item
+            WHERE isDeleted = 0
+        `;
+    } else {
+            selectQuery = `
+            SELECT COUNT(item_id) AS total_products
+            FROM Item
+            WHERE branch_id = ? AND isDeleted = 0
+        `;
+    }
+    
+
+    db.query(selectQuery, [branch_id], (err, result) => {
+        if (err) {
+            console.error(err);
+            return res.status(500).json({ error: "Failed to retrieve total products" });
+        }
+        return res.status(200).json(result[0]);
+    });
+});
+
+// Get total item stocks in a branch
+ItemRouter.post("/totalItemStocksInBranch", (req, res) => {
+    const branch_id = req.body.branch_id;
+    const isMasterAdmin = req.body.isMasterAdmin;
+    let selectQuery;
+
+    if (isMasterAdmin) {
+        selectQuery = `
+            SELECT SUM(quantity) AS total_item_stocks
+            FROM Item
+            WHERE isDeleted = 0
+        `;
+    } else {
+        selectQuery = `
+            SELECT SUM(quantity) AS total_item_stocks
+            FROM Item
+            WHERE branch_id = ? AND isDeleted = 0
+        `;
+    }
+
+    db.query(selectQuery, [branch_id], (err, result) => {
+        if (err) {
+            console.error(err);
+            return res.status(500).json({ error: "Failed to retrieve total item stocks" });
+        }
+        return res.status(200).json(result[0]);
+    });
+});
+
+// Get total inventory cost in a branch
+ItemRouter.post("/totalInventoryCostInBranch", (req, res) => {
+    const branch_id = req.body.branch_id;
+    const isMasterAdmin = req.body.isMasterAdmin;
+    let selectQuery;
+
+    if (isMasterAdmin) {
+        selectQuery = `
+            SELECT SUM(price * quantity) AS total_inventory_cost
+            FROM Item
+            WHERE isDeleted = 0
+        `;
+    } else {
+        selectQuery = `
+            SELECT SUM(price * quantity) AS total_inventory_cost
+            FROM Item
+            WHERE branch_id = ? AND isDeleted = 0
+        `;
+    }
+
+    db.query(selectQuery, [branch_id], (err, result) => {
+        if (err) {
+            console.error(err);
+            return res.status(500).json({ error: "Failed to retrieve total inventory cost" });
+        }
+        return res.status(200).json(result[0]);
+    });
+});
+
+// Get total out of stock items in a branch
+ItemRouter.post("/totalOutOfStockInBranch", (req, res) => {
+    const branch_id = req.body.branch_id;
+    const isMasterAdmin = req.body.isMasterAdmin;
+    let selectQuery;
+
+    if (isMasterAdmin) {
+        selectQuery = `
+            SELECT COUNT(item_id) AS total_out_of_stock_items
+            FROM Item
+            WHERE quantity = 0 AND isDeleted = 0
+        `;
+    } else {
+        selectQuery = `
+            SELECT COUNT(item_id) AS total_out_of_stock_items
+            FROM Item
+            WHERE branch_id = ? AND quantity = 0 AND isDeleted = 0
+        `;
+    }
+
+    db.query(selectQuery, [branch_id], (err, result) => {
+        if (err) {
+            console.error(err);
+            return res.status(500).json({ error: "Failed to retrieve total out of stock items" });
+        }
+        return res.status(200).json(result[0]);
+    });
+});
+
+ItemRouter.post("/topItems", async (req, res) => {
+    const branch_id = req.body.branch_id;
+    const isMasterAdmin = req.body.isMasterAdmin;
+    console.log(isMasterAdmin)
+    let selectQuery;
+
+    if (isMasterAdmin) {
+        selectQuery = `
+            SELECT item_name, SUM(quantity) AS total_quantity
+            FROM Item
+            WHERE isDeleted = 0
+            GROUP BY item_name
+            ORDER BY total_quantity DESC
+            LIMIT 10
+        `;
+    } else {
+        selectQuery = `
+            SELECT item_name, SUM(quantity) AS total_quantity
+            FROM Item
+            WHERE branch_id = ? AND isDeleted = 0
+            GROUP BY item_name
+            ORDER BY total_quantity DESC
+            LIMIT 10
+        `;
+    }
+
+    db.query(selectQuery, [branch_id], (err, result) => {
+        if (err) {
+            console.error(err);
+            return res.status(500).json({ error: "Failed to retrieve top items" });
+        }
+        return res.status(200).json(result);
+    });
+
+})
+
+ItemRouter.post("/itemsPerCategory", (req, res) => {
+    const branch_id = req.body.branch_id;
+    const isMasterAdmin = req.body.isMasterAdmin;
+    let selectQuery;
+
+    if (isMasterAdmin) {
+        selectQuery = `
+            SELECT category, COUNT(*) AS count 
+            FROM Item 
+            WHERE isDeleted = 0 
+            GROUP BY category
+        `;
+    } else {
+        selectQuery = `
+            SELECT category, COUNT(*) AS count 
+            FROM Item 
+            WHERE branch_id = ? AND isDeleted = 0 
+            GROUP BY category
+        `;
+    }
+
+  db.query(selectQuery, [branch_id], (err, result) => {
+    if (err) {
+      console.error(err);
+      return res.status(500).json({ error: "Failed to retrieve items per category" });
+    }
+    return res.status(200).json(result);
+  });
+});
+
+
 export { ItemRouter };

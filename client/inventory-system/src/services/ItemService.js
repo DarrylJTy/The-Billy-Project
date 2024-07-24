@@ -36,7 +36,31 @@ const ItemService = {
     // Get all sizes
     getSizes: async () => {
         return await axios.get(`${API_URL}/sizes`);
-    }
+    },
+
+    getTotalProducts: async (branch_id, isMasterAdmin) => {
+        return await axios.post(`${API_URL}/totalProductsInBranch`, { branch_id, isMasterAdmin })
+    },
+
+    getTotalItemStocks: async (branch_id, isMasterAdmin) => {
+        return await axios.post(`${API_URL}/totalItemStocksInBranch`, { branch_id, isMasterAdmin })
+    },
+
+    getTotalOutOfStockInBranch: async (branch_id, isMasterAdmin) => {
+        return await axios.post(`${API_URL}/totalOutOfStockInBranch`, { branch_id, isMasterAdmin })
+    },
+
+    getTotalInventoryCost: async (branch_id, isMasterAdmin) => {
+        return await axios.post(`${API_URL}/totalInventoryCostInBranch`, { branch_id, isMasterAdmin })
+    },
+
+    getTopItems: async (branch_id, isMasterAdmin) => {
+        return await axios.post(`${API_URL}/topItems`, { branch_id, isMasterAdmin  })
+    },
+    
+    getItemsPerCategory: async (branch_id, isMasterAdmin) => {
+        return await axios.post(`${API_URL}/itemsPerCategory`, { branch_id, isMasterAdmin  })
+    },
 };
 
 export default ItemService;
