@@ -1,6 +1,7 @@
 import axios from 'axios';
+import server from './config';
 
-const API_URL = `${import.meta.env.VITE_SERVER_URL}/branches`; // backend API URL
+const API_URL = `${server.hostname}:${server.port}/branches`; // backend API URL
 
 const BranchService = {
     createBranch: async (branchData) => {

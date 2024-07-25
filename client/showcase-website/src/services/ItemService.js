@@ -1,6 +1,7 @@
 import axios from 'axios';
+import server from './config.js'
 
-const API_URL = `${process.env.GATSBY_SERVER_URL}/items`; // Replace with your backend API URL
+const API_URL = `${server.hostname}:${server.port}/items`; // Replace with your backend API URL
 
 const ItemService = {
     getAllItems: async () => {

@@ -1,0 +1,16 @@
+.login-form-container {
+    background-color: #FFDEDE; /* Light red background */
+    border-radius: 20px; /* Rounded corners */
+    width: 90%; /* Adjust as needed */
+    max-width: 400px; /* Max width for the form */
+    height: 300px; /* Fixed height */
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 20px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.password-input {
+    background-color: #ffff;
+}
