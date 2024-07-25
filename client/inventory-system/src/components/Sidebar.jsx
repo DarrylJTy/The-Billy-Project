@@ -11,6 +11,7 @@ import { NavLink, useNavigate } from "react-router-dom";
 import TokenDecoder from "../services/TokenDecoder";
 import BranchService from "../services/BranchService";
 import axios from "axios";
+import server from "../services/config"
 
 const Sidebar = () => {
 	const [isMasterAdmin, setIsMasterAdmin] = useState(false);
@@ -35,7 +36,7 @@ const Sidebar = () => {
 
 
 	const handleLogout = async () => {
-		await axios.get(`${import.meta.env.VITE_SERVER_URL}/logout`, { withCredentials: true})
+		await axios.get(`${server.hostname}:${server.port}/logout`, { withCredentials: true})
 		.then(res => {
 			location.reload(true);
 		}).catch(err => console.log(err));

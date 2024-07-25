@@ -1,6 +1,7 @@
 import axios from 'axios';
+import server from './config';
 
-const API_URL = `${import.meta.env.VITE_SERVER_URL}/items`; // Replace with your backend API URL
+const API_URL = `${server.hostname}:${server.port}/items`; // backend API URLL
 
 const ItemService = {
     // Get all items with their sizes

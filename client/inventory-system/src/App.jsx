@@ -18,8 +18,8 @@ export default function App() {
 
 	useEffect(() => {
 		const checkAdminStatus = async () => {
-			const status = await TokenDecoder.isMasterAdmin();
-			setIsMasterAdmin(status);
+      const status = await TokenDecoder.isMasterAdmin();
+        setIsMasterAdmin(status);
 		};
 		checkAdminStatus();
 	}, []);

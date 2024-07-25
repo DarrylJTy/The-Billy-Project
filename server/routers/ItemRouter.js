@@ -105,24 +105,6 @@ ItemRouter.get("/getAllWithDeleted", (req, res) => {
     });
 });
 
-// // Get item by id with sizes
-// ItemRouter.get("/:item_id", (req, res) => {
-//     const item_id = req.params.item_id;
-//     const selectQuery =
-//         "SELECT Item.*, GROUP_CONCAT(Size.size_dimension) AS sizes FROM Item LEFT JOIN Item_Size ON Item.item_id = Item_Size.item_id LEFT JOIN Size ON Item_Size.size_id = Size.size_id WHERE Item.item_id = ? AND Item.isDeleted = 0 GROUP BY Item.item_id";
-
-//     db.query(selectQuery, [item_id], (err, result) => {
-//         if (err) {
-//             console.error(err);
-//             return res.status(500).json({ error: "Failed to retrieve item" });
-//         }
-//         if (result.length === 0) {
-//             return res.status(404).json({ error: "Item not found" });
-//         }
-//         return res.status(200).json(result[0]);
-//     });
-// });
-
 // Get items from a specific branch
 ItemRouter.post("/getFromBranch", (req, res) => {
     const selectQuery =
