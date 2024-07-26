@@ -67,10 +67,6 @@ LoginRouter.post('/login', (req, res) => {
                 const expireDate = new Date(now.getTime() + 2 * 60 * 60 * 1000); // 2 hours from now
 
                 res.cookie('token', token, {
-                        expires: expireDate,
-                        httpOnly: true,
-                        secure: true,
-                        sameSite: 'None'
                 });
                 
                 return res.json({Status: "Success"});
