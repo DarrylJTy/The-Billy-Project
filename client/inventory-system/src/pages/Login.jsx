@@ -18,12 +18,13 @@ function Login() {
 	const navigate = useNavigate();
     const handleSubmit = (event) => {
         event.preventDefault();
-        axios.post(`${server.hostname}/login`, values)
+        axios.post(`/api/login`, values)
         .then(res => {
 			if (res.data.Status === "Success") {
+				axios.post('/api/dashboard')
 				navigate("/dashboard");
 				console.log("success");
-				// location.reload(true);
+				location.reload(true);
             } else {
                 alert("Error");
             }
@@ -38,7 +39,7 @@ function Login() {
 				{/* Logo Column */}
 				<Col md={7} className="d-flex justify-content-center align-items-center p-0">
 					<img
-						src="/mrbillylogorevamp"
+						src="https://firebasestorage.googleapis.com/v0/b/the-billy-imgdb.appspot.com/o/mrbillylogorevamp.png?alt=media&token=b1def480-411a-420b-9b46-7bd30103452d"
 						alt="Logo"
 						className="img-fluid w-80 h-40"
 					/>
