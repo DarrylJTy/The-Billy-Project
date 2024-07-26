@@ -68,6 +68,8 @@ LoginRouter.post('/login', (req, res) => {
 
                 res.cookie('token', token, {
                         expires: expireDate,
+                        httpOnly: true,
+                        secure: true,
                         sameSite: 'None'
                 });
                 
