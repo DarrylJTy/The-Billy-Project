@@ -25,6 +25,7 @@ export default function App() {
 		};
 		const checkAdminStatus = async () => {
       		const status = await TokenDecoder.isMasterAdmin();
+			console.log(status);
         	setIsMasterAdmin(status);
 		};
 		checkAdminStatus();
@@ -39,6 +40,9 @@ export default function App() {
             <Route path='/' element={<Navigate to="/login" />} />
             <Route path='/register' element={<Register />} />
             <Route path='/login' element={<Login />} />
+			<Route path="/dashboard" element={<Dashboard />} />
+		    <Route path="/404" element={<NotFound />} />
+		 	<Route path="*" element={<Navigate to="/404" />} />
           </>
         )}
 
