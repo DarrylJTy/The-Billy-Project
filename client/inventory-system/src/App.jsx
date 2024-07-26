@@ -33,16 +33,13 @@ export default function App() {
 
   return (
     <BrowserRouter>
-      <Routes basename="/my-app">
+      <Routes>
         {/* Public Routes */}
         {!token && (
           <>
             <Route path='/' element={<Navigate to="/login" />} />
             <Route path='/register' element={<Register />} />
             <Route path='/login' element={<Login />} />
-			<Route path="/dashboard" element={<Dashboard />} />
-		    <Route path="/404" element={<NotFound />} />
-		 	<Route path="*" element={<Navigate to="/404" />} />
           </>
         )}
 
