@@ -22,7 +22,8 @@ function Login() {
         .then(res => {
 			if (res.data.Status === "Success") {
 				navigate("/dashboard");
-				location.reload(true);
+				console.log("success");
+				// location.reload(true);
             } else {
                 alert("Error");
             }
@@ -37,7 +38,7 @@ function Login() {
 				{/* Logo Column */}
 				<Col md={7} className="d-flex justify-content-center align-items-center p-0">
 					<img
-						src="../../public/mrbillylogorevamp"
+						src="/mrbillylogorevamp"
 						alt="Logo"
 						className="img-fluid w-80 h-40"
 					/>
