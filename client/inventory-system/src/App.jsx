@@ -11,6 +11,7 @@ import ProtectedRoute from "./utils/ProtectedRoutes"
 import Branches from "./components/Branches";
 import Admins from "./components/Admins";
 import Dashboard from "./pages/Dashboard";
+import 'bootstrap/dist/css/bootstrap.min.css';
 
 export default function App() {
   const token = document.cookie;
