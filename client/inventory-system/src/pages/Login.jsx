@@ -18,7 +18,7 @@ function Login() {
 	const navigate = useNavigate();
     const handleSubmit = (event) => {
         event.preventDefault();
-        axios.post(`${server.hostname}:${server.port}/login`, values)
+        axios.post(`${server.hostname}/login`, values)
         .then(res => {
 			if (res.data.Status === "Success") {
 				navigate("/dashboard");
@@ -37,7 +37,7 @@ function Login() {
 				{/* Logo Column */}
 				<Col md={7} className="d-flex justify-content-center align-items-center p-0">
 					<img
-						src="../src/assets/mrbillylogorevamp.png"
+						src="../assets/mrbillylogorevamp.png"
 						alt="Logo"
 						className="img-fluid w-80 h-40"
 					/>
