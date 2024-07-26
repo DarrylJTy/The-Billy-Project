@@ -36,7 +36,7 @@ const Sidebar = () => {
 
 
 	const handleLogout = async () => {
-		await axios.get(`${server.hostname}:${server.port}/logout`, { withCredentials: true})
+		await axios.get(`${server.hostname}/logout`, { withCredentials: true})
 		.then(res => {
 			location.reload(true);
 		}).catch(err => console.log(err));

@@ -18,10 +18,11 @@ function Login() {
 	const navigate = useNavigate();
     const handleSubmit = (event) => {
         event.preventDefault();
-        axios.post(`${server.hostname}:${server.port}/login`, values)
+        axios.post(`${server.hostname}/login`, values)
         .then(res => {
 			if (res.data.Status === "Success") {
 				navigate("/dashboard");
+				console.log("success");
 				location.reload(true);
             } else {
                 alert("Error");
