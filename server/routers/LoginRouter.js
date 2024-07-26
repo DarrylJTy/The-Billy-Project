@@ -68,7 +68,7 @@ LoginRouter.post('/login', (req, res) => {
 
                 res.cookie('token', token, {
                         expires: expireDate,
-                        sameSite: 'Lax'
+                        sameSite: 'None'
                 });
                 
                 return res.json({Status: "Success"});
