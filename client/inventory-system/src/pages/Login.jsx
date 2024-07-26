@@ -38,7 +38,7 @@ function Login() {
 				{/* Logo Column */}
 				<Col md={7} className="d-flex justify-content-center align-items-center p-0">
 					<img
-						src="../src/assets/mrbillylogorevamp.png"
+						src="https://firebasestorage.googleapis.com/v0/b/the-billy-imgdb.appspot.com/o/mrbillylogorevamp.png?alt=media&token=b1def480-411a-420b-9b46-7bd30103452d"
 						alt="Logo"
 						className="img-fluid w-80 h-40"
 					/>
