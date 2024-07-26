@@ -14,13 +14,18 @@ import Dashboard from "./pages/Dashboard";
 import 'bootstrap/dist/css/bootstrap.min.css';
 
 export default function App() {
-  const token = document.cookie;
+  const [token, setToken] = useState(null);
   const [isMasterAdmin, setIsMasterAdmin] = useState(false);
 
 	useEffect(() => {
+		const checkToken = () => {
+		      // Implement your token retrieval logic
+		      const tokenFromCookies = document.cookie;
+		      setToken(tokenFromCookies);
+		};
 		const checkAdminStatus = async () => {
-      const status = await TokenDecoder.isMasterAdmin();
-        setIsMasterAdmin(status);
+      		const status = await TokenDecoder.isMasterAdmin();
+        	setIsMasterAdmin(status);
 		};
 		checkAdminStatus();
 	}, []);
