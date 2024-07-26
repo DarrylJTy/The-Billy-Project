@@ -37,7 +37,7 @@ function Login() {
 				{/* Logo Column */}
 				<Col md={7} className="d-flex justify-content-center align-items-center p-0">
 					<img
-						src="../assets/mrbillylogorevamp.png"
+						src="../../public/mrbillylogorevamp"
 						alt="Logo"
 						className="img-fluid w-80 h-40"
 					/>
