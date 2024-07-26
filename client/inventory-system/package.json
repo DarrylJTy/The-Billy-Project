@@ -3,7 +3,7 @@
   "private": true,
   "version": "0.0.0",
   "type": "module",
-  "proxy": "https://the-billy-project-deploy.onrender.com",
+  "proxy": "https://the-billy-project-deploy1.onrender.com",
   "scripts": {
     "dev": "vite",
     "build": "vite build",
