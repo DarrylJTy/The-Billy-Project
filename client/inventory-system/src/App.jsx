@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { HashRouter, Routes, Route, Navigate } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import Home from './pages/Home';
 import Register from './pages/Register';
 import Login from './pages/Login';
@@ -31,8 +31,8 @@ export default function App() {
 	}, []);
 
   return (
-    <HashRouter>
-      <Routes>
+    <BrowserRouter>
+      <Routes basename="/my-app">
         {/* Public Routes */}
         {!token && (
           <>
@@ -71,6 +71,6 @@ export default function App() {
         <Route path="/404" element={<NotFound />} />
         <Route path="*" element={<Navigate to="/404" />} />
       </Routes>
-    </HashRouter>
+    </BrowserRouter>
   );
 }
