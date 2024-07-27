@@ -68,6 +68,7 @@ LoginRouter.post('/login', (req, res) => {
 
                 res.cookie('token', token, {
                     path: "/",
+                    expires: expireDate,
                 });
                 
                 return res.json({Status: "Success", admin});
