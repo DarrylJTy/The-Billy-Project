@@ -22,7 +22,7 @@ const Sidebar = () => {
 			// const status = await TokenDecoder.isMasterAdmin();
 			const { role } = JSON.parse(localStorage.getItem('admin'));
 			console.log("role:", role)
-			if(role === "master") {
+			if(role === "admin	") {
 				setIsMasterAdmin(true);
 			}
 			

@@ -69,7 +69,6 @@ LoginRouter.post('/login', (req, res) => {
                 res.cookie('token', token, {
                     path: "/",
                     expires: expireDate,
-                    secure: true,
                     sameSite: "None",
                 });
                 
