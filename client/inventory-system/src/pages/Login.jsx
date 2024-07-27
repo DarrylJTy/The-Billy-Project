@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import server from "../services/config";
@@ -8,13 +8,20 @@ import "../css/Login.css"
 import TokenDecoder from "../services/TokenDecoder";
 
 function Login() {
+	const [token, setToken] = useState('')
     const [values, setValues] = useState({
         username: '',
         password: '',
 	})
 	const [passwordVisible, setPasswordVisible] = useState(false); 
 
-    axios.defaults.withCredentials = true;
+	axios.defaults.withCredentials = true;
+
+	const getCookie = (name) => {
+		const value = `; ${document.cookie}`;
+		const parts = value.split(`; ${name}=`);
+		if (parts.length === 2) return parts.pop().split(';').shift();
+	}
 
 	const navigate = useNavigate();
     const handleSubmit = (event) => {
@@ -28,7 +35,9 @@ function Login() {
 				console.log("admin:", admin);
 				const parsedAdmin = JSON.parse(admin)
 				console.log(parsedAdmin.role)
-				console.log(TokenDecoder.getToken());
+
+				console.log("token:",res.token)
+				getCookie('token')
             } else {
                 alert("Error");
             }
