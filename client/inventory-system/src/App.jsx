@@ -19,13 +19,16 @@ export default function App() {
 
   useEffect(() => {
     const fetchAdmin = async () => {
-      const admin = await TokenService.getAdmin(); 
-      console.log("admin from app:", admin)
-      console.log(admin);
-      if (admin.data) {
-          console.log(admin);  
-          setAdmin(admin);
-      } 
+      try {
+          const adminData = await TokenService.getAdmin(); 
+          console.log("admin Data (app.jsx):", adminData)
+          if (adminData) {
+              setAdmin(adminData);
+          } 
+      } catch(error) {
+          console.error("Failed to fetch admin data:", error);
+      }
+      
     }
     const checkAdminStatus = async () => {
         console.log(admin.role);
