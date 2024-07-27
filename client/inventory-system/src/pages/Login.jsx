@@ -36,6 +36,10 @@ function Login() {
 				const parsedAdmin = JSON.parse(admin)
 				console.log(parsedAdmin.role)
 
+				axios.post(`${server.hostname}/dashboard`).then(res => {
+					console.log(res);
+				})
+
 				console.log("token:",res.token)
 				getCookie('token')
             } else {

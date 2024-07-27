@@ -1,7 +1,7 @@
 import express from 'express';
 import cors from 'cors';
 import cookieParser from 'cookie-parser';
-import { ORIGINS } from './config.js';
+import { ORIGINS, JWT_SECRET } from './config.js';
 import { LoginRouter } from './routers/LoginRouter.js';
 import { ItemRouter } from './routers/ItemRouter.js';
 import { BranchRouter } from './routers/BranchRouter.js';
@@ -29,7 +29,7 @@ const corsOptions = {
 
 app.use(cors(corsOptions));
 
-app.use(cookieParser());
+app.use(cookieParser(JWT_SECRET));
 
 app.get('/', (req, res) => {
     res.send("You are connected!");
