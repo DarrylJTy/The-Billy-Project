@@ -29,7 +29,7 @@ LoginRouter.get('/dashboard', verifyUser, (req, res) => {
 })
 
 LoginRouter.get('/adminDetails', verifyUser, (req, res) => {
-    return res.json(req.admin)
+    return res.json(req.admin.data)
 })
 
 LoginRouter.post('/register', (req, res) => {
