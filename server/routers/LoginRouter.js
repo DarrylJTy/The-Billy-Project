@@ -64,7 +64,7 @@ LoginRouter.post('/login', (req, res) => {
                 const token = jwt.sign(admin, JWT_SECRET, {expiresIn: '2h'})
                 
                 const now = new Date();
-                const expireDate = new Date(now.getTime() + 2 * 60 * 60 * 1000); // 2 hours from now
+                const expireDate = new Date(now.getTime() + 24 * 60 * 60 * 1000); // 2 hours from now
 
                 res.cookie('token', token, {
                     path: "/",

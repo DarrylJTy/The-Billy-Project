@@ -20,17 +20,18 @@ const Sidebar = () => {
 	useEffect(() => {
 		const checkAdminStatus = async () => {
 			// const status = await TokenDecoder.isMasterAdmin();
-			const status = JSON.parse(localStorage.getItem('admin')).role === "master";
-			if(status) {
-				setIsMasterAdmin(status);
+			const { role } = JSON.parse(localStorage.getItem('admin'));
+			console.log("role:", role)
+			if(role === "master") {
+				setIsMasterAdmin(true);
 			}
 			
 		};
 		const checkBranchName = async () => {
 			const branchID = await TokenDecoder.getBranchId();
-			console.log(branchID);
+			// console.log(branchID);
 			const branch = await BranchService.getSpecificBranchName(branchID);
-			console.log(branch.data[0]);
+			// console.log(branch.data[0]);
 			setBranchName(branch.data[0].branch_name)
 		}
 		checkAdminStatus();
