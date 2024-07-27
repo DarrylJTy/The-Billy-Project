@@ -24,14 +24,12 @@ function Login() {
         .then(res => {
 			if (res.data.Status === "Success") {
 				// navigate("/dashboard");
-				localStorage.setItem('admin', JSON.stringify(res.data.admin));
-				const admin = localStorage.getItem('admin');
-				console.log("admin:", admin);
-				const parsedAdmin = JSON.parse(admin)
-				console.log(parsedAdmin.role)
-
 				axios.get(`${server.hostname}/dashboard`).then(res => {
 					console.log(res);
+				})
+
+				axios.get(`${server.hostname}/adminDetails`).then(result => {
+					console.log("admin:", result)
 				})
 
             } else {

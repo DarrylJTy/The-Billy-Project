@@ -7,6 +7,7 @@ import ViewItems from "./components/ViewItems";
 import ViewAll from "./components/ViewAll";
 import NotFound from './pages/404';
 import TokenDecoder from "./services/TokenDecoder";
+import TokenService from "./services/TokenService";
 import ProtectedRoute from "./utils/ProtectedRoutes"
 import Branches from "./components/Branches";
 import Admins from "./components/Admins";
@@ -17,14 +18,18 @@ export default function App() {
   const [isMasterAdmin, setIsMasterAdmin] = useState(false);
 
   useEffect(() => {
-    const admin = localStorage.getItem('admin');
-    if (admin) {
-        setAdmin(JSON.parse(admin));
+    const fetchAdmin = async () => {
+      const admin = await TokenService.getAdmin();
+      if (admin) {
+          console.log(admin);  
+          setAdmin(admin);
+      } 
     }
     const checkAdminStatus = async () => {
         console.log(admin.role);
         setIsMasterAdmin(admin.role === "master");
-		};
+    };
+    fetchAdmin();
 		checkAdminStatus();
 	}, []);
 
