@@ -34,8 +34,6 @@ function Login() {
 					console.log(res);
 				})
 
-				console.log(res.cookie);
-
             } else {
                 alert("Error");
             }

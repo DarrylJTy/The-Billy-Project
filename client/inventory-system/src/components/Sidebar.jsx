@@ -22,6 +22,11 @@ const Sidebar = () => {
 			// const status = await TokenDecoder.isMasterAdmin();
 			const { role } = JSON.parse(localStorage.getItem('admin'));
 			console.log("role:", role)
+
+			axios.get(`${server.hostname}/dashboard`).then(res => {
+					console.log(res);
+			})
+			
 			if(role === "admin") {
 				setIsMasterAdmin(true);
 			}
