@@ -7,7 +7,7 @@ const TokenService = {
     getAdmin: async () => {
         axios.get(`${API_URL}/adminDetails`, {withCredentials: true})
             .then(response => {
-                console.log("From Token Service:", response)
+                console.log("From Token Service:", response.data.role)
                 return response;
             })
             .catch(error => {

@@ -8,7 +8,7 @@ function ProtectedRoute() {
     useEffect(() => {
         const checkAdmin = localStorage.getItem('admin');
         if (checkAdmin) {
-        setAdmin(checkAdmin);
+            setAdmin(checkAdmin);
         }
     }, [])
     
