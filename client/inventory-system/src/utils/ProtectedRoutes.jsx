@@ -12,7 +12,7 @@ function ProtectedRoute() {
         }
     }, [])
     
-    return checkAdmin ? <Outlet/>:<Navigate to="/login"/>;
+    return admin ? <Outlet/>:<Navigate to="/login"/>;
 }
 
 export default ProtectedRoute;

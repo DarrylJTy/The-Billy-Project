@@ -19,10 +19,10 @@ export default function App() {
   useEffect(() => {
     const admin = localStorage.getItem('admin');
     if (admin) {
-      setAdmin(JSON.parse(admin));
+        setAdmin(JSON.parse(admin));
     }
 		const checkAdminStatus = async () => {
-        setIsMasterAdmin(admin.role);
+        setIsMasterAdmin(admin.role === "master");
 		};
 		checkAdminStatus();
 	}, []);
