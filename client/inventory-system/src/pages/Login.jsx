@@ -21,9 +21,7 @@ function Login() {
         axios.post(`${server.hostname}/login`, values)
         .then(res => {
 			if (res.data.Status === "Success") {
-				navigate("/dashboard");
-				console.log("success");
-				location.reload(true);
+				// navigate("/dashboard");
             } else {
                 alert("Error");
             }
