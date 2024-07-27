@@ -21,7 +21,8 @@ export default function App() {
     if (admin) {
         setAdmin(JSON.parse(admin));
     }
-		const checkAdminStatus = async () => {
+    const checkAdminStatus = async () => {
+        console.log(admin.role);
         setIsMasterAdmin(admin.role === "master");
 		};
 		checkAdminStatus();

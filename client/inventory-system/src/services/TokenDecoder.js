@@ -2,6 +2,8 @@ import {jwtDecode} from 'jwt-decode';
 
 const TokenDecoder = {
     getToken: async () => {
+        console.log("document cookie:", document.cookie)
+        console.log(document)
         return document.cookie;
     },
     getAdminFromToken: async () => { // This function will get the information from the cookie.
