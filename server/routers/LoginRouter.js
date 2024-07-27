@@ -70,7 +70,7 @@ LoginRouter.post('/login', (req, res) => {
                     expires: expireDate,
                     secure: true,
                     sameSite: "None",
-                    domain: "the-billy-project-deploy.vercel.app"
+                    domain: ".the-billy-project-deploy.onrender.com"
                 });
                 
                 return res.json({Status: "Success", admin: admin});
