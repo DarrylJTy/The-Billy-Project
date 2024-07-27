@@ -1,6 +1,7 @@
 import express from 'express';
 import cors from 'cors';
 import cookieParser from 'cookie-parser';
+import bodyParser from "body-parser";
 import { ORIGINS } from './config.js';
 import { LoginRouter } from './routers/LoginRouter.js';
 import { ItemRouter } from './routers/ItemRouter.js';
@@ -27,7 +28,7 @@ const corsOptions = {
 }
 
 app.use(cors(corsOptions));
-
+app.use(bodyParser.urlencoded({extended: true}))
 app.use(cookieParser());
 
 app.get('/', (req, res) => {

@@ -8,10 +8,10 @@ import {
 	CDBSidebarMenuItem,
 } from "cdbreact";
 import { NavLink, useNavigate } from "react-router-dom";
-import TokenDecoder from "../services/TokenDecoder";
 import BranchService from "../services/BranchService";
 import axios from "axios";
 import server from "../services/config"
+import SessionService from "../services/SessionService";
 
 const Sidebar = () => {
 	const [isMasterAdmin, setIsMasterAdmin] = useState(false);
@@ -19,16 +19,18 @@ const Sidebar = () => {
 
 	useEffect(() => {
 		const checkAdminStatus = async () => {
-			const status = await TokenDecoder.isMasterAdmin();
+			const status = await SessionService.isMasterAdmin();
+			console.log(status)
 			if(status) {
 				setIsMasterAdmin(status);
 			}
 			
 		};
 		const checkBranchName = async () => {
-			const branchID = await TokenDecoder.getBranchId();
-			const branch = await BranchService.getSpecificBranchName(branchID);
-			setBranchName(branch.data[0].branch_name)
+			const branchID = await SessionService.getBranchId();
+			console.log(branchID)
+			// const branch = await BranchService.getSpecificBranchName(branchID);
+			// setBranchName(branch.data[0].branch_name)
 		}
 		checkAdminStatus();
 		checkBranchName();

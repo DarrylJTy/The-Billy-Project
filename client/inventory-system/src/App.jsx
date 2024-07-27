@@ -6,29 +6,34 @@ import Login from './pages/Login';
 import ViewItems from "./components/ViewItems";
 import ViewAll from "./components/ViewAll";
 import NotFound from './pages/404';
-import TokenDecoder from "./services/TokenDecoder";
+import SessionService from "./services/SessionService";
 import ProtectedRoute from "./utils/ProtectedRoutes"
 import Branches from "./components/Branches";
 import Admins from "./components/Admins";
 import Dashboard from "./pages/Dashboard";
 
 export default function App() {
-  const token = document.cookie;
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [isMasterAdmin, setIsMasterAdmin] = useState(false);
 
-	useEffect(() => {
+  useEffect(() => {
+    const checkIsLoggedIn = async () => {
+      const status = await SessionService.isLoggedIn();
+      setIsLoggedIn(status)
+    }
 		const checkAdminStatus = async () => {
-      const status = await TokenDecoder.isMasterAdmin();
-        setIsMasterAdmin(status);
-		};
-		checkAdminStatus();
+      const role = await SessionService.isMasterAdmin();
+        setIsMasterAdmin(role);
+    };
+    checkIsLoggedIn();
+    checkAdminStatus();
 	}, []);
 
   return (
     <BrowserRouter>
       <Routes>
         {/* Public Routes */}
-        {!token && (
+        {!isLoggedIn && (
           <>
             <Route path='/' element={<Navigate to="/login" />} />
             <Route path='/register' element={<Register />} />
