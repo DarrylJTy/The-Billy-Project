@@ -70,6 +70,7 @@ LoginRouter.post('/login', (req, res) => {
                     expires: expireDate,
                     httpOnly: true,
                     secure: true,
+                    sameSite: "None"
                 });
                 
                 return res.json({Status: "Success"});
