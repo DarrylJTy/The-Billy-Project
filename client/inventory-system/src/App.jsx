@@ -13,10 +13,14 @@ import Admins from "./components/Admins";
 import Dashboard from "./pages/Dashboard";
 
 export default function App() {
-  const token = document.cookie;
+  const [admin, setAdmin] = useState(false);
   const [isMasterAdmin, setIsMasterAdmin] = useState(false);
 
-	useEffect(() => {
+  useEffect(() => {
+    const checkAdmin = localStorage.getItem('admin');
+    if (checkAdmin) {
+      setAdmin(checkAdmin);
+    }
 		const checkAdminStatus = async () => {
       const status = await TokenDecoder.isMasterAdmin();
         setIsMasterAdmin(status);
@@ -28,7 +32,7 @@ export default function App() {
     <BrowserRouter>
       <Routes>
         {/* Public Routes */}
-        {!token && (
+        {!admin && (
           <>
             <Route path='/' element={<Navigate to="/login" />} />
             <Route path='/register' element={<Register />} />
