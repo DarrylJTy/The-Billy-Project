@@ -22,7 +22,9 @@ function Login() {
         .then(res => {
 			if (res.data.Status === "Success") {
 				// navigate("/dashboard");
-				console.log(res.data.admin)
+				localStorage.setItem('token', res.data.token);
+				const token = localStorage.getItem('token');
+				console.log(token);
             } else {
                 alert("Error");
             }
