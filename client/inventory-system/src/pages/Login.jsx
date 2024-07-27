@@ -5,6 +5,7 @@ import server from "../services/config";
 import { Container, Row, Col, Form, Button } from "react-bootstrap";
 import { Eye, EyeSlash } from 'react-bootstrap-icons';
 import "../css/Login.css"
+import TokenDecoder from "../services/TokenDecoder";
 
 function Login() {
     const [values, setValues] = useState({
@@ -27,6 +28,7 @@ function Login() {
 				console.log("admin:", admin);
 				const parsedAdmin = JSON.parse(admin)
 				console.log(parsedAdmin.role)
+				console.log(TokenDecoder.getToken());
             } else {
                 alert("Error");
             }
