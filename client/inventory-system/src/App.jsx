@@ -19,7 +19,7 @@ export default function App() {
 
   useEffect(() => {
     const fetchAdmin = async () => {
-      const admin = await TokenService.getAdmin();
+      const admin = await TokenService.getAdmin().data;
       if (admin) {
           console.log(admin);  
           setAdmin(admin);
