@@ -27,7 +27,9 @@ const Sidebar = () => {
 		};
 		const checkBranchName = async () => {
 			const branchID = await TokenDecoder.getBranchId();
+			console.log(branchID);
 			const branch = await BranchService.getSpecificBranchName(branchID);
+			console.log(branch.data[0]);
 			setBranchName(branch.data[0].branch_name)
 		}
 		checkAdminStatus();

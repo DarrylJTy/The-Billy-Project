@@ -25,7 +25,7 @@ function Login() {
 				localStorage.setItem('admin', JSON.stringify(res.data.admin));
 				const admin = localStorage.getItem('admin');
 				console.log("admin:",admin);
-				console.log(admin.role)
+				console.log(admin['role'])
             } else {
                 alert("Error");
             }
