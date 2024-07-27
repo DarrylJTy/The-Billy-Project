@@ -3,18 +3,10 @@ import jwt from 'jsonwebtoken';
 import bcrypt from 'bcrypt';
 import { JWT_SECRET } from '../config.js'
 import db from '../db.js'
-import session from 'express-session'
 
 const LoginRouter = express.Router();
 
 const saltRounds = 10;
-
-LoginRouter.use(session({
-    key: "admin",
-    secret: process.env.SECRET || 'secret',
-    resave: true,
-    saveUninitialized: false,
-}))
 
 const verifyUser = (req, res, next) => {
     const token = req.cookies.token;
@@ -54,25 +46,13 @@ LoginRouter.post('/register', (req, res) => {
     })
 })
 
-LoginRouter.get('/login', (req, res) => {
-    if (req.session.admin) {
-        if (req.session.admin.role === 'admin') {
-            res.send({ isLoggedIn: true, isMasterAdmin: true, admin: req.session.admin })
-        } else {
-            res.send({ isLoggedIn: true, isMasterAdmin: false, admin: req.session.admin })
-        }
-    } else {
-        res.send({ isLoggedIn: false})
-    }
-})
-
 LoginRouter.post('/login', (req, res) => {
     const query = 'SELECT * FROM Admin WHERE username = ? AND isDeleted = 0';
     db.query(query, [req.body.username], (error, data) => {
         if(error) return res.json({Error: "Login error in server."})
         if(data.length > 0) {
             bcrypt.compare(req.body.password.toString(), data[0].password, (error, response) => {
-                if(error) return res.json({Error: "Password Incorrect. Please try again."})
+                if(error) return res.json({Error: "Password compare error."})
             if(response) {
                 const admin = {
                     admin_id: data[0].admin_id,
@@ -81,7 +61,15 @@ LoginRouter.post('/login', (req, res) => {
                     role: data[0].role,
                     branch_id: data[0].branch_id
                 };
-                req.session.admin = admin;
+                const token = jwt.sign(admin, JWT_SECRET, {expiresIn: '2h'})
+                
+                const now = new Date();
+                const expireDate = new Date(now.getTime() + 2 * 60 * 60 * 1000); // 2 hours from now
+
+                res.cookie('token', token, {
+                        expires: expireDate,
+                        secure: true,
+                });
                 
                 return res.json({Status: "Success"});
             } else {
@@ -95,11 +83,8 @@ LoginRouter.post('/login', (req, res) => {
 })
 
 LoginRouter.get('/logout', (req, res) => {
-    req.session.destroy();
-});
-
-LoginRouter.get('/fetchAdminData', (req, res) => {
-    res.send(req.session.admin);
+    res.clearCookie('token');
+    return res.json({Status: "Success"})
 })
 
 export { LoginRouter };

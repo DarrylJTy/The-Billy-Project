@@ -1,11 +1,10 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import server from "../services/config";
 import { Container, Row, Col, Form, Button } from "react-bootstrap";
 import { Eye, EyeSlash } from 'react-bootstrap-icons';
 import "../css/Login.css"
-import SessionService from "../services/SessionService";
 
 function Login() {
     const [values, setValues] = useState({
@@ -17,31 +16,20 @@ function Login() {
     axios.defaults.withCredentials = true;
 
 	const navigate = useNavigate();
-
     const handleSubmit = (event) => {
         event.preventDefault();
         axios.post(`${server.hostname}/login`, values)
         .then(res => {
 			if (res.data.Status === "Success") {
-				axios.get(`${server.hostname}/login`).then(res => {
-					console.log(res.data)
-				});
-				// navigate("/dashboard");
+				navigate("/dashboard");
 				console.log("success");
-				// location.reload(true);
+				location.reload(true);
             } else {
                 alert("Error");
             }
         })
         .catch(err => console.log(err));
-	}
-	
-	const handleLogout = async () => {
-		await axios.get(`${server.hostname}/logout`)
-		.then(res => {
-			location.reload(true);
-		}).catch(err => console.log(err));
-    };
+    }
 
 
 	return (
@@ -94,10 +82,6 @@ function Login() {
 
 							<Button variant="danger" type="submit" className="w-100 rounded-0">
 								Log in
-							</Button>
-							<hr></hr>
-							<Button variant="danger" onClick={handleLogout} className="w-100 rounded-0">
-								Sign Out (for debugging)
 							</Button>
 						</Form>
 					</div>

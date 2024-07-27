@@ -7,7 +7,6 @@ import PieChart from '../components/PieChart';
 import "../css/ChartsCSS.css"
 import TokenDecoder from '../services/TokenDecoder';
 import ItemService from '../services/ItemService';
-import SessionService from '../services/SessionService';
 
 function Dashboard() {
   const [branch_id, setBranchId] = useState(null);
@@ -22,8 +21,8 @@ function Dashboard() {
   useEffect(() => {
     const fetchBranchIdandRole = async () => {
       try {
-        const isMasterAdmin = await SessionService.isMasterAdmin();
-        const branchId = await SessionService.getBranchId();
+        const isMasterAdmin = await TokenDecoder.isMasterAdmin();
+        const branchId = await TokenDecoder.getBranchId();
         setBranchId(branchId);
         setIsMasterAdmin(isMasterAdmin);
       } catch (error) {
