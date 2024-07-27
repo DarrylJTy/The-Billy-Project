@@ -4,7 +4,6 @@ import ItemService from '../services/ItemService';
 import BranchService from '../services/BranchService';
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { imgDB } from '../services/firebase';
-import TokenDecoder from '../services/TokenDecoder';
 
 const ItemForm = ({ showModal, handleCloseModal, isUpdateMode, selectedItem, fetchItems, branch_id }) => {
     const [sizes, setSizes] = useState([]);

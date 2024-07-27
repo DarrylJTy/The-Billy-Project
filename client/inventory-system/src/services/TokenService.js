@@ -21,7 +21,30 @@ const TokenService = {
             // Optionally, you can rethrow the error if you want to handle it further up the chain
             throw error;
         }
-    }
+    },
+    getAdminBranchID: async () => {
+        try {
+            const response = await axios.get(`${API_URL}/adminDetails`, { withCredentials: true });
+            return response.data.branch_id;
+        } catch (error) {
+            // Handle any errors that occur during the request
+            console.log("From Token Service Error:", error);
+            // Optionally, you can rethrow the error if you want to handle it further up the chain
+            throw error;
+        }
+    },
+    getIsMasterAdmin: async () => {
+        try {
+            const response = await axios.get(`${API_URL}/adminDetails`, { withCredentials: true });
+            const isMasterAdmin = response.data.role === "admin"
+            return isMasterAdmin;
+        } catch (error) {
+            // Handle any errors that occur during the request
+            console.log("From Token Service Error:", error);
+            // Optionally, you can rethrow the error if you want to handle it further up the chain
+            throw error;
+        }
+    },
 }
 
 export default TokenService;

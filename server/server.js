@@ -29,7 +29,7 @@ const corsOptions = {
 
 app.use(cors(corsOptions));
 
-app.use(cookieParser(JWT_SECRET));
+app.use(cookieParser());
 
 app.get('/', (req, res) => {
     res.send("You are connected!");

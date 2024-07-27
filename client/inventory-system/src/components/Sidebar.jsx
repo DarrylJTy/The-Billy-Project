@@ -8,7 +8,7 @@ import {
 	CDBSidebarMenuItem,
 } from "cdbreact";
 import { NavLink, useNavigate } from "react-router-dom";
-import TokenDecoder from "../services/TokenDecoder";
+import TokenService from "../services/TokenService";
 import BranchService from "../services/BranchService";
 import axios from "axios";
 import server from "../services/config"
@@ -19,28 +19,24 @@ const Sidebar = () => {
 
 	useEffect(() => {
 		const checkAdminStatus = async () => {
-			// const status = await TokenDecoder.isMasterAdmin();
-			axios.get(`${server.hostname}/adminDetails`, {withCredentials: true})
-				.then(res => {
-					console.log(res);
-					if(res.role === "admin") {
-						setIsMasterAdmin(true);
-					}
-				})
-				.catch(error => {
-					console.log("Error:", error);
-				})
-			
+			try {
+				const isMasterAdmin = await TokenService.getIsMasterAdmin();
+				setIsMasterAdmin(isMasterAdmin);
+			} catch(error) {
+				console.error("Failed to fetch admin data:", error);
+			}
 		};
 		const checkBranchName = async () => {
-			const branchID = await TokenDecoder.getBranchId();
-			// console.log(branchID);
-			const branch = await BranchService.getSpecificBranchName(branchID);
-			// console.log(branch.data[0]);
-			setBranchName(branch.data[0].branch_name)
+			try {
+				const branchID = await TokenService.getAdminBranchID();
+				const branch = await BranchService.getSpecificBranchName(branchID); 
+				setBranchName(branch.data[0].branch_name)
+			} catch (error) {
+				console.error("Failed to fetch admin data:", error);
+			}
 		}
 		checkAdminStatus();
-		// checkBranchName();
+		checkBranchName();
 	}, []);
 
 
@@ -48,7 +44,6 @@ const Sidebar = () => {
 		await axios.get(`${server.hostname}/logout`, { withCredentials: true})
 		.then(res => {
 			location.reload(true);
-			localStorage.removeItem('admin')
 		}).catch(err => console.log(err));
     };
 

@@ -5,10 +5,8 @@ import server from "../services/config";
 import { Container, Row, Col, Form, Button } from "react-bootstrap";
 import { Eye, EyeSlash } from 'react-bootstrap-icons';
 import "../css/Login.css"
-import TokenDecoder from "../services/TokenDecoder";
 
 function Login() {
-	const [token, setToken] = useState('')
     const [values, setValues] = useState({
         username: '',
         password: '',
@@ -23,15 +21,10 @@ function Login() {
         axios.post(`${server.hostname}/login`, values)
         .then(res => {
 			if (res.data.Status === "Success") {
-				// navigate("/dashboard");
 				axios.get(`${server.hostname}/dashboard`).then(res => {
 					console.log(res);
 				})
-
-				axios.get(`${server.hostname}/adminDetails`).then(result => {
-					console.log("admin:", result)
-				})
-
+				navigate("/dashboard");
             } else {
                 alert("Error");
             }

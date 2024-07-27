@@ -6,10 +6,13 @@ function ProtectedRoute() {
     const [admin, setAdmin] = useState(false);
 
     useEffect(() => {
-        const checkAdmin = localStorage.getItem('admin');
-        if (checkAdmin) {
-            setAdmin(checkAdmin);
+        const fetchAdminData = async () => {
+            const adminData = await TokenService.getAdmin();
+            if (adminData) {
+                setAdmin(adminData);
+            }
         }
+        fetchAdminData();
     }, [])
     
     return admin ? <Outlet/>:<Navigate to="/login"/>;

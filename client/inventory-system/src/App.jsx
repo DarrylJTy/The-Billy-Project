@@ -18,26 +18,21 @@ export default function App() {
   const [isMasterAdmin, setIsMasterAdmin] = useState(false);
 
   useEffect(() => {
-    const fetchAdmin = async () => {
+    const fetchAdminAndAdminStatus = async () => {
       try {
           const adminData = await TokenService.getAdmin(); 
-        console.log("admin Data (app.jsx):", adminData)
-        console.log("role testing:", adminData.role)
+          const isMasterAdmin = await TokenService.getIsMasterAdmin();
+          console.log("admin Data (app.jsx):", adminData)
+          console.log("isMasterAdmin (app.jsx):", isMasterAdmin);
           if (adminData) {
-            setAdmin(adminData);
-            console.log("try casting:", {adminData});
+              setAdmin(adminData);
+              setIsMasterAdmin(isMasterAdmin);
           } 
       } catch(error) {
           console.error("Failed to fetch admin data:", error);
       }
-      
     }
-    const checkAdminStatus = async () => {
-        console.log("rawr: ", admin.role);
-        setIsMasterAdmin(admin.role === "admin");
-    };
-    fetchAdmin();
-		checkAdminStatus();
+    fetchAdminAndAdminStatus();
 	}, []);
 
   return (
