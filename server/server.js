@@ -1,7 +1,7 @@
 import express from 'express';
 import cors from 'cors';
 import cookieParser from 'cookie-parser';
-import { ORIGINS, JWT_SECRET } from './config.js';
+import { ORIGINS } from './config.js';
 import { LoginRouter } from './routers/LoginRouter.js';
 import { ItemRouter } from './routers/ItemRouter.js';
 import { BranchRouter } from './routers/BranchRouter.js';

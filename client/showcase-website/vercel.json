@@ -1,0 +1,10 @@
+{
+    "buildCommand": "gatsby build",
+    "installCommand": "npm i",
+    "rewrites": [
+        {
+            "source": "/(.*)",
+            "destination": "/"
+        }
+    ]
+}
