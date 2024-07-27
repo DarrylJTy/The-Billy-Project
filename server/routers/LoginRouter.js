@@ -25,11 +25,11 @@ const verifyUser = (req, res, next) => {
 }
 
 LoginRouter.get('/dashboard', verifyUser, (req, res) => {
-    return res.json({Status: "Success", admin: req.admin})
+    return res.json({Status: "Success", username: req.admin.usernamne})
 })
 
 LoginRouter.get('/adminDetails', verifyUser, (req, res) => {
-    return res.json({admin: req.admin})
+    return res.json(req.admin)
 })
 
 LoginRouter.post('/register', (req, res) => {

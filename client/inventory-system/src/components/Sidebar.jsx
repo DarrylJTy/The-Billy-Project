@@ -20,16 +20,16 @@ const Sidebar = () => {
 	useEffect(() => {
 		const checkAdminStatus = async () => {
 			// const status = await TokenDecoder.isMasterAdmin();
-			const { role } = JSON.parse(localStorage.getItem('admin'));
-			console.log("role:", role)
-
-			axios.get(`${server.hostname}/dashboard`).then(res => {
+			axios.get(`${server.hostname}/adminDetails`, {withCredentials: true})
+				.then(res => {
 					console.log(res);
-			})
-			
-			if(role === "admin") {
-				setIsMasterAdmin(true);
-			}
+					if(res.role === "admin") {
+						setIsMasterAdmin(true);
+					}
+				})
+				.catch(error => {
+					console.log("Error:", error);
+				})
 			
 		};
 		const checkBranchName = async () => {
@@ -40,7 +40,7 @@ const Sidebar = () => {
 			setBranchName(branch.data[0].branch_name)
 		}
 		checkAdminStatus();
-		checkBranchName();
+		// checkBranchName();
 	}, []);
 
 
