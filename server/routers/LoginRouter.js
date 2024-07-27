@@ -11,11 +11,11 @@ const saltRounds = 10;
 const verifyUser = (req, res, next) => {
     const token = req.cookies.token;
     if(!token) {
-        return res.json({Error: "You not authenticated."})
+        return res.sendStatus(401); // Unauthorized
     } else {
-        jwt.verify(token, process.env.JWT_SECRET, (err, decoded) => {
+        jwt.verify(token, JWT_SECRET, (err, decoded) => {
             if(err) {
-                return res.json({Error: "Error with token."})
+                return res.sendStatus(403); // Forbidden
             } else {
                 req.admin = decoded;
                 next();
@@ -25,7 +25,11 @@ const verifyUser = (req, res, next) => {
 }
 
 LoginRouter.get('/dashboard', verifyUser, (req, res) => {
-    return res.json({Status: "Success", username: req.admin.username})
+    return res.json({Status: "Success", username: req.admin.usernamne})
+})
+
+LoginRouter.get('/adminDetails', verifyUser, (req, res) => {
+    return res.json(req.admin)
 })
 
 LoginRouter.post('/register', (req, res) => {
@@ -64,13 +68,17 @@ LoginRouter.post('/login', (req, res) => {
                 const token = jwt.sign(admin, JWT_SECRET, {expiresIn: '2h'})
                 
                 const now = new Date();
-                const expireDate = new Date(now.getTime() + 2 * 60 * 60 * 1000); // 2 hours from now
+                const expireDate = new Date(now.getTime() + 24 * 60 * 60 * 1000); // 1 day
 
                 res.cookie('token', token, {
-                        expires: expireDate,
+                    path: "/",
+                    expires: expireDate,
+                    httpOnly: true,
+                    secure: true,
+                    sameSite: "None"
                 });
                 
-                return res.json({Status: "Success"});
+                return res.json({Status: "Success", admin});
             } else {
                 return res.json({Error: "Incorrect Password."});
             }
@@ -82,8 +90,13 @@ LoginRouter.post('/login', (req, res) => {
 })
 
 LoginRouter.get('/logout', (req, res) => {
-    res.clearCookie('token');
-    return res.json({Status: "Success"})
-})
+    res.cookie('token', '', {
+        httpOnly: true,
+        secure: true,
+        expires: new Date(0), // Set expiration date in the past
+        sameSite: 'None' // Adjust according to your needs
+    });
+    res.json({ message: 'Logged out successfully' });
+});
 
 export { LoginRouter };

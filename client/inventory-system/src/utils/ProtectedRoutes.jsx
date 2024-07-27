@@ -1,10 +1,22 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { Navigate, Outlet } from "react-router-dom";
+import TokenService from "../services/TokenService";
 
 
 function ProtectedRoute() {
-    const token = document.cookie;
-    return token ? <Outlet/>:<Navigate to="/login"/>;
+    const [admin, setAdmin] = useState(false);
+
+    useEffect(() => {
+        const fetchAdminData = async () => {
+            const adminData = await TokenService.getAdmin();
+            if (adminData) {
+                setAdmin(adminData);
+            }
+        }
+        fetchAdminData();
+    }, [])
+    
+    return admin ? <Outlet/>:<Navigate to="/login"/>;
 }
 
 export default ProtectedRoute;

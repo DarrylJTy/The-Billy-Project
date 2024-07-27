@@ -5,8 +5,8 @@ import Layout from '../components/Layout';
 import BarChart from '../components/BarChart';
 import PieChart from '../components/PieChart';
 import "../css/ChartsCSS.css"
-import TokenDecoder from '../services/TokenDecoder';
 import ItemService from '../services/ItemService';
+import TokenService from '../services/TokenService';
 
 function Dashboard() {
   const [branch_id, setBranchId] = useState(null);
@@ -21,9 +21,9 @@ function Dashboard() {
   useEffect(() => {
     const fetchBranchIdandRole = async () => {
       try {
-        const isMasterAdmin = await TokenDecoder.isMasterAdmin();
-        const branchId = await TokenDecoder.getBranchId();
-        setBranchId(branchId);
+        const isMasterAdmin = await TokenService.getIsMasterAdmin();
+        const branchID = await TokenService.getAdminBranchID();
+        setBranchId(branchID);
         setIsMasterAdmin(isMasterAdmin);
       } catch (error) {
         console.error('Error fetching branch ID:', error);

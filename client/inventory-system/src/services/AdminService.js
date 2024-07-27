@@ -1,7 +1,7 @@
 import axios from 'axios';
 import server from './config';
 
-const API_URL = `${server.hostname}:${server.port}/admins`; // backend API URL
+const API_URL = `${server.hostname}/admins`; // backend API URL
 
 const AdminService = {
     getAllAdmins: async () => {

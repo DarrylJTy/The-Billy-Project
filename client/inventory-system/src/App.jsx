@@ -6,33 +6,45 @@ import Login from './pages/Login';
 import ViewItems from "./components/ViewItems";
 import ViewAll from "./components/ViewAll";
 import NotFound from './pages/404';
-import TokenDecoder from "./services/TokenDecoder";
+import TokenService from "./services/TokenService";
 import ProtectedRoute from "./utils/ProtectedRoutes"
 import Branches from "./components/Branches";
 import Admins from "./components/Admins";
 import Dashboard from "./pages/Dashboard";
 
 export default function App() {
-  const token = document.cookie;
+  const [admin, setAdmin] = useState(false);
   const [isMasterAdmin, setIsMasterAdmin] = useState(false);
 
-	useEffect(() => {
-		const checkAdminStatus = async () => {
-      const status = await TokenDecoder.isMasterAdmin();
-        setIsMasterAdmin(status);
-		};
-		checkAdminStatus();
+  useEffect(() => {
+    const fetchAdminAndAdminStatus = async () => {
+      try {
+          const adminData = await TokenService.getAdmin(); 
+          const isMasterAdmin = await TokenService.getIsMasterAdmin();
+          console.log("admin Data (app.jsx):", adminData)
+          console.log("isMasterAdmin (app.jsx):", isMasterAdmin);
+          if (adminData) {
+              setAdmin(adminData);
+              setIsMasterAdmin(isMasterAdmin);
+          } 
+      } catch(error) {
+          console.error("Failed to fetch admin data:", error);
+      }
+    }
+    fetchAdminAndAdminStatus();
 	}, []);
 
   return (
     <BrowserRouter>
       <Routes>
         {/* Public Routes */}
-        {!token && (
+        {!admin && (
           <>
             <Route path='/' element={<Navigate to="/login" />} />
             <Route path='/register' element={<Register />} />
             <Route path='/login' element={<Login />} />
+            <Route path="/404" element={<NotFound />} />
+            <Route path="*" element={<Navigate to="/404" />} />
           </>
         )}
 
