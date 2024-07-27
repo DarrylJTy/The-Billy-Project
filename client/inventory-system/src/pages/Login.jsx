@@ -17,12 +17,6 @@ function Login() {
 
 	axios.defaults.withCredentials = true;
 
-	const getCookie = (name) => {
-		const value = `; ${document.cookie}`;
-		const parts = value.split(`; ${name}=`);
-		if (parts.length === 2) return parts.pop().split(';').shift();
-	}
-
 	const navigate = useNavigate();
     const handleSubmit = (event) => {
         event.preventDefault();
@@ -36,12 +30,12 @@ function Login() {
 				const parsedAdmin = JSON.parse(admin)
 				console.log(parsedAdmin.role)
 
-				axios.post(`${server.hostname}/dashboard`).then(res => {
+				axios.get(`${server.hostname}/dashboard`).then(res => {
 					console.log(res);
 				})
 
-				console.log("token:",res.token)
-				getCookie('token')
+				console.log(res.cookie);
+
             } else {
                 alert("Error");
             }

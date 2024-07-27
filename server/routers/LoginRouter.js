@@ -74,7 +74,7 @@ LoginRouter.post('/login', (req, res) => {
                     sameSite: "None",
                 });
                 
-                return res.json({Status: "Success", admin, token});
+                return res.json({Status: "Success", admin});
             } else {
                 return res.json({Error: "Incorrect Password."});
             }
