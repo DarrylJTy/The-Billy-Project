@@ -25,6 +25,7 @@ function Login() {
 					console.log(res);
 				})
 				navigate("/dashboard");
+				location.reload(true);
             } else {
                 alert("Error");
             }
