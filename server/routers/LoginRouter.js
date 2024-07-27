@@ -67,12 +67,13 @@ LoginRouter.post('/login', (req, res) => {
                 const expireDate = new Date(now.getTime() + 2 * 60 * 60 * 1000); // 2 hours from now
 
                 res.cookie('token', token, {
+                    path: "/"
                     expires: expireDate,
                     secure: true,
                     sameSite: "None",
                 });
                 
-                return res.json({Status: "Success", admin: {admin}});
+                return res.json({Status: "Success", admin});
             } else {
                 return res.json({Error: "Incorrect Password."});
             }
