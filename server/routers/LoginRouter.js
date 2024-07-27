@@ -68,11 +68,6 @@ LoginRouter.post('/login', (req, res) => {
 
                 res.cookie('token', token, {
                     path: "/",
-                    domain: "deploy.vercel.app",
-                    httpOnly: false,
-                    secure: true,
-                    expires: expireDate,
-                    sameSite: "None",
                 });
                 
                 return res.json({Status: "Success", admin});
