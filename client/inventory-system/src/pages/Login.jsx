@@ -24,7 +24,7 @@ function Login() {
 				// navigate("/dashboard");
 				localStorage.setItem('token', res.data.token);
 				const token = localStorage.getItem('token');
-				console.log(token);
+				console.log("token:",token);
             } else {
                 alert("Error");
             }
