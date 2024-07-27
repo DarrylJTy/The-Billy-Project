@@ -17,13 +17,12 @@ export default function App() {
   const [isMasterAdmin, setIsMasterAdmin] = useState(false);
 
   useEffect(() => {
-    const checkAdmin = localStorage.getItem('admin');
-    if (checkAdmin) {
-      setAdmin(checkAdmin);
+    const admin = localStorage.getItem('admin');
+    if (admin) {
+      setAdmin(JSON.parse(admin));
     }
 		const checkAdminStatus = async () => {
-      const status = await TokenDecoder.isMasterAdmin();
-        setIsMasterAdmin(status);
+        setIsMasterAdmin(admin.role);
 		};
 		checkAdminStatus();
 	}, []);

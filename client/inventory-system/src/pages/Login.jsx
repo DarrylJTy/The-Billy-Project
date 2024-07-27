@@ -22,7 +22,7 @@ function Login() {
         .then(res => {
 			if (res.data.Status === "Success") {
 				// navigate("/dashboard");
-				localStorage.setItem('admin', res.data.admin);
+				localStorage.setItem('admin', JSON.stringify(res.data.admin));
 				const admin = localStorage.getItem('admin');
 				console.log(admin)
             } else {
