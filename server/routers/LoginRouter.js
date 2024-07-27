@@ -86,7 +86,6 @@ LoginRouter.post('/login', (req, res) => {
 
 LoginRouter.get('/logout', (req, res) => {
     res.clearCookie('token');
-    localStorage.removeItem('admin')
     return res.json({Status: "Success"})
 })
 

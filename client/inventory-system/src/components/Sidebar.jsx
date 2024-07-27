@@ -19,7 +19,8 @@ const Sidebar = () => {
 
 	useEffect(() => {
 		const checkAdminStatus = async () => {
-			const status = await TokenDecoder.isMasterAdmin();
+			// const status = await TokenDecoder.isMasterAdmin();
+			const status = JSON.parse(localStorage.getItem('admin')).role === "master";
 			if(status) {
 				setIsMasterAdmin(status);
 			}
@@ -41,6 +42,7 @@ const Sidebar = () => {
 		await axios.get(`${server.hostname}/logout`, { withCredentials: true})
 		.then(res => {
 			location.reload(true);
+			localStorage.removeItem('admin')
 		}).catch(err => console.log(err));
     };
 
