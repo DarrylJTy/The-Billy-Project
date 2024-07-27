@@ -21,9 +21,11 @@ export default function App() {
     const fetchAdmin = async () => {
       try {
           const adminData = await TokenService.getAdmin(); 
-          console.log("admin Data (app.jsx):", adminData)
+        console.log("admin Data (app.jsx):", adminData)
+        console.log("role testing:", adminData.role)
           if (adminData) {
-              setAdmin(adminData);
+            setAdmin(adminData);
+            console.log("try casting:", {adminData});
           } 
       } catch(error) {
           console.error("Failed to fetch admin data:", error);
@@ -31,8 +33,8 @@ export default function App() {
       
     }
     const checkAdminStatus = async () => {
-        console.log(admin.role);
-        setIsMasterAdmin(admin.role === "master");
+        console.log("rawr: ", admin.role);
+        setIsMasterAdmin(admin.role === "admin");
     };
     fetchAdmin();
 		checkAdminStatus();
