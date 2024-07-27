@@ -22,6 +22,7 @@ function Login() {
         .then(res => {
 			if (res.data.Status === "Success") {
 				// navigate("/dashboard");
+				console.log(res.data.admin)
             } else {
                 alert("Error");
             }

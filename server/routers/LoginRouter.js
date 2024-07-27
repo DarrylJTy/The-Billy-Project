@@ -68,12 +68,11 @@ LoginRouter.post('/login', (req, res) => {
 
                 res.cookie('token', token, {
                     expires: expireDate,
-                    httpOnly: true,
                     secure: true,
                     sameSite: "None"
                 });
                 
-                return res.json({Status: "Success"});
+                return res.json({Status: "Success", admin: admin});
             } else {
                 return res.json({Error: "Incorrect Password."});
             }
