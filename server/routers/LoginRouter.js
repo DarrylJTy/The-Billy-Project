@@ -69,7 +69,8 @@ LoginRouter.post('/login', (req, res) => {
                 res.cookie('token', token, {
                     expires: expireDate,
                     secure: true,
-                    sameSite: "None"
+                    sameSite: "None",
+                    domain: "the-billy-project-deploy.vercel.app"
                 });
                 
                 return res.json({Status: "Success", admin: admin});
