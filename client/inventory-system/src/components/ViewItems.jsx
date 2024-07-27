@@ -6,6 +6,7 @@ import Layout from './Layout';
 import ItemForm from './ItemForm';
 import TokenDecoder from '../services/TokenDecoder';
 import '../css/ViewItemsCSS.css';
+import TokenService from '../services/TokenService';
 
 const ViewItems = () => {
     const [items, setItems] = useState([]);
@@ -19,8 +20,8 @@ const ViewItems = () => {
     useEffect(() => {
         const fetchBranchId = async () => {
             try {
-                const branchId = await TokenDecoder.getBranchId();
-                setBranchId(branchId);
+                const branchID = await TokenService.getAdminBranchID();
+                setBranchId(branchID);
             } catch (error) {
                 console.error('Error fetching branch ID:', error);
             }

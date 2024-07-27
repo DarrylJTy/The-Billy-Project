@@ -90,8 +90,13 @@ LoginRouter.post('/login', (req, res) => {
 })
 
 LoginRouter.get('/logout', (req, res) => {
-    res.clearCookie('token');
-    return res.json({Status: "Success"})
-})
+    res.cookie('token', '', {
+        httpOnly: true,
+        secure: true,
+        expires: new Date(0), // Set expiration date in the past
+        sameSite: 'None' // Adjust according to your needs
+    });
+    res.json({ message: 'Logged out successfully' });
+});
 
 export { LoginRouter };
