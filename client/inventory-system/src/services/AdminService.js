@@ -14,7 +14,6 @@ const AdminService = {
 
     // Create a new admin
     createAdmin: async (adminData) => {
-        console.log(adminData)
         return await axios.post(`${API_URL}/create`, adminData);
     },
 

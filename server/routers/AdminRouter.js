@@ -16,8 +16,10 @@ AdminRouter.post("/create", async (req, res) => {
             req.body.branch_id,
         ]
         db.query(registerQuery, [values], (error, result) => {
+            if (error.code === 'ER_DUP_ENTRY') {
+                    return res.status(409).json({ Error: "Username already exists" });
+                }
             if(error) return res.json({Error: "Error inserting data into server."});
-            console.log("it ran");
             return res.json({Status: "Success"});
         })
     })
@@ -38,9 +40,9 @@ AdminRouter.get("/getAdmins", (req, res) => {
 // Get specific admin by ID
 AdminRouter.post("/getAdmin", (req, res) => {
     const selectQuery = "SELECT * FROM Admin WHERE admin_id = ? AND isDeleted = 0";
-    db.query(selectQuery, [req.body.admin_id], (err, result) => {
-        if (err) {
-            console.error(err);
+    db.query(selectQuery, [req.body.admin_id], (error, result) => {
+        if (error) {
+            console.error(error);
             return res.status(500).json({ error: "Failed to retrieve admin" });
         }
         return res.status(200).json(result);
@@ -52,20 +54,33 @@ AdminRouter.post("/update", async (req, res) => {
     const { username, password, branch_id, admin_id } = req.body;
 
     try {
+        // Hash the password
         const hashedPassword = await bcrypt.hash(password, 10);
+        
         const updateQuery = "UPDATE Admin SET username = ?, password = ?, branch_id = ? WHERE admin_id = ?";
         db.query(updateQuery, [username, hashedPassword, branch_id, admin_id], (err, result) => {
             if (err) {
-                console.error(err);
+                console.error("Database error:", err);
+
+                if (err.code === 'ER_DUP_ENTRY') {
+                    return res.status(409).json({ error: "Username already exists" });
+                }
+
                 return res.status(500).json({ error: "Failed to update admin" });
             }
+
+            if (result.affectedRows === 0) {
+                return res.status(404).json({ error: "Admin not found" });
+            }
+
             return res.status(200).json({ message: "Admin updated successfully" });
         });
     } catch (err) {
-        console.error(err);
+        console.error("Error hashing password:", err);
         return res.status(500).json({ error: "Failed to hash password" });
     }
 });
+
 
 // Delete an admin (flag as deleted)
 AdminRouter.post("/delete", (req, res) => {

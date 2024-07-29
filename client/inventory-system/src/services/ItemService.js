@@ -10,7 +10,6 @@ const ItemService = {
     },
 
     getAllItemsWithFilters: async (itemFilters) => {
-        console.log(itemFilters)
         return await axios.post(`${API_URL}/getItemsWithFilters`, itemFilters);
     },
     
@@ -26,6 +25,7 @@ const ItemService = {
     
     // Create a new item
     createItem: async (itemData) => {
+        console.log(itemData)
         return await axios.post(`${API_URL}/create`, itemData);
     },
     

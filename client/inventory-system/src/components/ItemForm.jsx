@@ -13,10 +13,9 @@ const ItemForm = ({ showModal, handleCloseModal, isUpdateMode, selectedItem, fet
         item_name: '',
         description: '',
         category: '',
-        quantity: '',
-        price: '',
         item_image: '',
     });
+    const [sizeDetails, setSizeDetails] = useState({});
 
     useEffect(() => {
         const fetchSizes = async () => {
@@ -37,21 +36,30 @@ const ItemForm = ({ showModal, handleCloseModal, isUpdateMode, selectedItem, fet
                 item_name: selectedItem.item_name,
                 description: selectedItem.description,
                 category: selectedItem.category,
-                quantity: selectedItem.quantity,
-                price: selectedItem.price,
                 item_image: selectedItem.item_image,
             });
-            setSelectedSizes(selectedItem.sizes ? selectedItem.sizes.split(',') : []);
+
+            // Initialize sizeDetails and selectedSizes based on selectedItem.sizes
+            const sizeDetails = {};
+            const selectedSizes = selectedItem.sizes.map(size => {
+                sizeDetails[size.size_id] = {
+                    quantity: size.quantity,
+                    price: size.price
+                };
+                return size.size_id; 
+            });
+
+            setSelectedSizes(selectedSizes);
+            setSizeDetails(sizeDetails);
         } else {
             setItemData({
                 item_name: '',
                 description: '',
                 category: '',
-                quantity: '',
-                price: '',
                 item_image: '',
             });
             setSelectedSizes([]);
+            setSizeDetails({});
         }
     }, [selectedItem, isUpdateMode]);
 
@@ -60,14 +68,25 @@ const ItemForm = ({ showModal, handleCloseModal, isUpdateMode, selectedItem, fet
         setItemData({ ...itemData, [name]: value });
     };
 
-    const handleCheckboxChange = (size_dimension) => {
+    const handleCheckboxChange = (size_id) => {
         setSelectedSizes(prev => {
-            if (prev.includes(size_dimension)) {
-                return prev.filter(size => size !== size_dimension);
+            if (prev.includes(size_id)) {
+                return prev.filter(size => size !== size_id);
             } else {
-                return [...prev, size_dimension];
+                return [...prev, size_id];
             }
         });
+    };
+
+    const handleSizeDetailChange = (size_id, e) => {
+        const { name, value } = e.target;
+        setSizeDetails(prev => ({
+            ...prev,
+            [size_id]: {
+                ...prev[size_id],
+                [name]: value
+            }
+        }));
     };
 
     const handleImageChange = (e) => {
@@ -78,24 +97,35 @@ const ItemForm = ({ showModal, handleCloseModal, isUpdateMode, selectedItem, fet
         e.preventDefault();
         try {
             let imageURL = itemData.item_image;
-            const branch = await BranchService.getSpecificBranchName(branch_id)
-            const branch_name = branch.data[0].branch_name
-            const imagePath = `${branch_id}-${branch_name}/`
+            const branch = await BranchService.getSpecificBranchName(branch_id);
+            const branch_name = branch.data[0].branch_name;
+            const imagePath = `${branch_id}-${branch_name}/`;
 
             if (itemImage) {
-                const storageRef = ref(imgDB, `${imagePath}` + `${isUpdateMode ? selectedItem.item_name : itemData.item_name}`);
+                const storageRef = ref(imgDB, `${imagePath}${isUpdateMode ? selectedItem.item_name : itemData.item_name}`);
                 await uploadBytes(storageRef, itemImage);
                 imageURL = await getDownloadURL(storageRef);
             }
 
+            // Convert sizeDetails to the format required by your API, if necessary
+            const sizesArray = Object.keys(sizeDetails)
+                .filter(size => selectedSizes.includes(Number(size))) // Filter based on selectedSizes
+                .map(size => ({
+                    size_id: Number(size), // Convert size_id to number if it's a string
+                    quantity: sizeDetails[size].quantity,
+                    price: sizeDetails[size].price
+                }));
+
             const updatedItem = {
                 ...itemData,
                 item_image: imageURL,
-                sizes: selectedSizes.join(','), // Convert sizes array to comma-separated string
-                branch_id, // Include branch_id here
+                sizes: sizesArray, // Send sizes as an array of objects
+                branch_id // Include branch_id here
             };
 
             if (isUpdateMode) {
+                console.log("sizesArray:", sizesArray)
+                console.log(updatedItem.sizes)
                 await ItemService.updateItem({ ...updatedItem, item_id: selectedItem.item_id });
             } else {
                 await ItemService.createItem(updatedItem);
@@ -106,11 +136,10 @@ const ItemForm = ({ showModal, handleCloseModal, isUpdateMode, selectedItem, fet
                 item_name: '',
                 description: '',
                 category: '',
-                quantity: '',
-                price: '',
                 item_image: '',
             });
-            setSelectedSizes([])
+            setSelectedSizes([]);
+            setSizeDetails({});
             fetchItems();
             handleCloseModal();
         } catch (error) {
@@ -163,42 +192,40 @@ const ItemForm = ({ showModal, handleCloseModal, isUpdateMode, selectedItem, fet
                         <div>
                             {sizes.length > 0 ? (
                                 sizes.map(size => (
-                                    <Form.Check
-                                        key={size.size_id}
-                                        type="checkbox"
-                                        label={size.size_dimension}
-                                        value={size.size_dimension}
-                                        checked={selectedSizes.includes(size.size_dimension)}
-                                        onChange={() => handleCheckboxChange(size.size_dimension)}
-                                    />
+                                    <div key={size.size_id} className="mb-2">
+                                        <Form.Check
+                                            type="checkbox"
+                                            label={size.size_dimension}
+                                            value={size.size_id}
+                                            checked={selectedSizes.includes(size.size_id)}
+                                            onChange={(e) => handleCheckboxChange(size.size_id, e)}
+                                        />
+                                        {selectedSizes.includes(size.size_id) && (
+                                            <div className="d-flex mt-2">
+                                                <Form.Control
+                                                    type="number"
+                                                    placeholder="Quantity"
+                                                    name="quantity"
+                                                    value={sizeDetails[size.size_id]?.quantity || ''}
+                                                    onChange={(e) => handleSizeDetailChange(size.size_id, e)}
+                                                />
+                                                <Form.Control
+                                                    type="number"
+                                                    step="0.01"
+                                                    placeholder="Price"
+                                                    name="price"
+                                                    value={sizeDetails[size.size_id]?.price || ''}
+                                                    onChange={(e) => handleSizeDetailChange(size.size_id, e)}
+                                                    className="ml-2"
+                                                />
+                                            </div>
+                                        )}
+                                    </div>
                                 ))
                             ) : (
                                 <div>No sizes available</div>
                             )}
                         </div>
-                    </Form.Group>
-                    <Form.Group controlId="quantity">
-                        <Form.Label>Quantity</Form.Label>
-                        <Form.Control
-                            type="number"
-                            name="quantity"
-                            value={itemData.quantity}
-                            onChange={handleTextChange}
-                            required
-                            autoComplete="off"
-                        />
-                    </Form.Group>
-                    <Form.Group controlId="price">
-                        <Form.Label>Price (Php)</Form.Label>
-                        <Form.Control
-                            type="number"
-                            step="0.01"
-                            name="price"
-                            value={itemData.price}
-                            onChange={handleTextChange}
-                            required
-                            autoComplete="off"
-                        />
                     </Form.Group>
                     <Form.Group controlId="item_image">
                         <Form.Label>Photo</Form.Label>

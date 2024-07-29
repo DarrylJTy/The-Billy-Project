@@ -70,27 +70,28 @@ function Admins() {
             await AdminService.updateAdmin(updatedAdmin);
             alert('Admin Updated');
             fetchAdmins();
-            handleCloseModal();
         } catch (error) {
+            alert('Username already exists.')
             console.error('Error updating admin:', error);
         }
+        handleCloseModal();
     };
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        try {  
-            const newAdminData = { ...adminData };
-            if (isUpdateMode) {
-                await handleUpdate(newAdminData);
-            } else {
+        const newAdminData = { ...adminData };
+        if (isUpdateMode) {
+            await handleUpdate(newAdminData);
+        } else {
+            try {
                 await AdminService.createAdmin(newAdminData);
                 alert('Admin Added');
                 fetchAdmins(); 
-                handleCloseModal(); 
+            } catch (error) {
+                alert('Username already exists.')
             }
-        } catch (error) {
-            console.error('Error creating or updating admin:', error);
         }
+        handleCloseModal();
     };
 
     const handleTextChange = (e) => {

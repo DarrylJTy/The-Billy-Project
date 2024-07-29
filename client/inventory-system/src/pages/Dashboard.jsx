@@ -51,7 +51,7 @@ function Dashboard() {
     const fetchTotalItemOutOfStock = async () => {
       try {
         const total = await ItemService.getTotalOutOfStockInBranch(branch_id, isMasterAdmin);
-        setTotalItemsOutOfStock(total.data.total_out_of_stock_items);
+        setTotalItemsOutOfStock(total.data);
       } catch (error) {
         console.error('Error fetching total items out of stock:', error);
       }
@@ -90,24 +90,24 @@ function Dashboard() {
 
     const fetchTopItems = async () => {
       try {
-        const response = await ItemService.getTopItems(branch_id, isMasterAdmin);
-        const items = response.data;
+          const response = await ItemService.getTopItems(branch_id, isMasterAdmin);
+          const items = response.data;
 
-        const labels = items.map(item => item.item_name);
-        const data = items.map(item => item.total_quantity);
+          const labels = items.map(item => `${item.item_name} (${item.size_dimension})`);
+          const data = items.map(item => item.total_quantity);
 
-        setBarChartData({
-          labels: labels,
-          datasets: [
-            {
-              label: 'Top 10 Items by Quantity',
-              backgroundColor: 'rgb(255, 192, 192)',
-              borderColor: 'rgb(0)',
-              borderWidth: 1,
-              data: data,
-            },
-          ],
-        });
+          setBarChartData({
+            labels: labels,
+            datasets: [
+              {
+                label: 'Top 10 Items by Quantity',
+                backgroundColor: 'rgb(255, 192, 192)',
+                borderColor: 'rgb(0)',
+                borderWidth: 1,
+                data: data,
+              },
+            ],
+          });
       } catch (error) {
         console.error('Error fetching top items:', error);
       }

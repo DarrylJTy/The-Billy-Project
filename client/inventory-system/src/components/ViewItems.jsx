@@ -63,6 +63,7 @@ const ViewItems = () => {
         }
     };
 
+
     const handleDelete = async (itemId) => {
         try {
             await ItemService.deleteItem(itemId);
@@ -111,33 +112,37 @@ const ViewItems = () => {
                                 </tr>
                             </thead>
                             <tbody>
-                                {items.map((item) => (
-                                    <tr key={item.item_id}>
-                                        <td>{item.item_id}</td>
-                                        <td>
-                                            {item.item_image ? (
-                                                <img 
-                                                    src={item.item_image} 
-                                                    style={{ width: '100px', height: '100px', objectFit: 'cover' }} 
-                                                />
-                                            ) : (
-                                                <span>No image uploaded</span>
-                                            )}
-                                        </td>
-                                        <td>{item.item_name}</td>
-                                        <td>{item.description}</td>
-                                        <td>{item.category}</td>
-                                        <td>
-                                            {item.sizes ? item.sizes : 'N/A'}
-                                        </td>
-                                        <td>{item.quantity}</td>
-                                        <td>Php {item.price.toFixed(2)}</td>
-                                        <td className='d-flex align-items-center justify-content-center'>
-                                            <Button variant="warning" onClick={() => handleShowModal(item)} className="m-1">Update</Button>
-                                            <Button variant="danger" onClick={() => handleDelete(item.item_id)}>Delete</Button>
-                                        </td>
-                                    </tr>
-                                ))}
+                                {items.map((item) => {
+                                    const sizes = item.sizes.map(detail => detail.size_dimension).join(' | ');
+                                    const quantities = item.sizes.map(detail => detail.quantity).join(' | ');
+                                    const prices = item.sizes.map(detail => `Php ${detail.price.toFixed(2)}`).join(' | ');
+
+                                    return (
+                                        <tr key={item.item_id}>
+                                            <td>{item.item_id}</td>
+                                            <td>
+                                                {item.item_image ? (
+                                                    <img 
+                                                        src={item.item_image} 
+                                                        style={{ width: '100px', height: '100px', objectFit: 'cover' }} 
+                                                    />
+                                                ) : (
+                                                    <span>No image uploaded</span>
+                                                )}
+                                            </td>
+                                            <td>{item.item_name}</td>
+                                            <td>{item.description}</td>
+                                            <td>{item.category}</td>
+                                            <td>{sizes || 'N/A'}</td>
+                                            <td>{quantities || 'N/A'}</td>
+                                            <td>{prices || 'N/A'}</td>
+                                            <td className='d-flex align-items-center justify-content-center'>
+                                                <Button variant="warning" onClick={() => handleShowModal(item)} className="m-1">Update</Button>
+                                                <Button variant="danger" onClick={() => handleDelete(item.item_id)}>Delete</Button>
+                                            </td>
+                                        </tr>
+                                    );
+                                })}
                             </tbody>
                         </Table>
                     </div>
@@ -155,7 +160,7 @@ const ViewItems = () => {
                         selectedItem={selectedItem} 
                         fetchItems={fetchItems}
                         sizes={sizes}
-                        branch_id={branch_id} // Pass branch_id here
+                        branch_id={branch_id}
                     />
                 </div>
             </div>

@@ -116,7 +116,7 @@ const ViewAll = () => {
                         </Row>
                     </Form.Group>
 
-                    <div style={{ maxHeight: '500px', overflowY: 'auto' }} className="table-container">
+                    <div style={{ maxHeight: '31.25rem', overflowY: 'auto' }} className="table-container">
                         <Table striped bordered hover className="table-fixed">
                             <thead>
                                 <tr>

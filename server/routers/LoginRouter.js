@@ -79,8 +79,6 @@ LoginRouter.post('/login', (req, res) => {
 
                 if (NODE_PRODUCTION) {
                     cookieOptions.sameSite = "None";
-                } else {
-                    cookieOptions.sameSite = "Lax";
                 }
 
                 res.cookie('token', token, cookieOptions);
@@ -97,12 +95,18 @@ LoginRouter.post('/login', (req, res) => {
 })
 
 LoginRouter.get('/logout', (req, res) => {
-    res.cookie('token', '', {
-        httpOnly: NODE_PRODUCTION,
-        secure: NODE_PRODUCTION,
-        expires: new Date(0), // Set expiration date in the past
-        sameSite: 'None' // Adjust according to your needs
-    });
+    const cookieOptions = {
+        path: "/",
+        expires: new Date(0),
+        httpOnly: true,
+        secure: NODE_PRODUCTION, 
+    }
+
+    if (NODE_PRODUCTION) {
+        cookieOptions.sameSite = "None";
+    }
+    
+    res.cookie('token', '', cookieOptions);
     res.json({ message: 'Logged out successfully' });
 });
 
