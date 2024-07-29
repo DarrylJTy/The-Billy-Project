@@ -70,17 +70,20 @@ LoginRouter.post('/login', (req, res) => {
                 const now = new Date();
                 const expireDate = new Date(now.getTime() + 24 * 60 * 60 * 1000); // 1 day
 
-                console.log(NODE_PRODUCTION)
-
-                res.cookie('token', token, {
+                const cookieOptions = {
                     path: "/",
                     expires: expireDate,
                     httpOnly: true,
-                    secure: NODE_PRODUCTION,
-                    if(NODE_PRODUCTION) {
-                        sameSite: "None"
-                    }
-                });
+                    secure: NODE_PRODUCTION, 
+                }
+
+                if (NODE_PRODUCTION) {
+                    cookieOptions.sameSit = "None";
+                } else {
+                    cookieOptions.sameSit = "Lax";
+                }
+
+                res.cookie('token', token, cookieOptions);
                 
                 return res.json({Status: "Success", admin});
             } else {
