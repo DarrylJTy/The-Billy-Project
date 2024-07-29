@@ -155,7 +155,7 @@ function Branches() {
                                     <th>Name</th>
                                     <th>Image</th>
                                     <th>Address</th>
-                                    <th>Contect Number</th>
+                                    <th>Contact Number</th>
                                     <th className="text-center">Actions</th>
                                 </tr>
                             </thead>

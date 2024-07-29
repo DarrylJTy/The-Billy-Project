@@ -2,6 +2,8 @@ import dotenv from 'dotenv';
 
 dotenv.config();
 
+const NODE_PRODUCTION = process.env.NODE_PRODUCTION || false
+
 const JWT_SECRET = process.env.JWT_SECRET
 
 const INVENTORY_ORIGIN = process.env.INVENTORY_ORIGIN || "http://localhost:5173"
@@ -12,4 +14,4 @@ const ORIGINS = {
     showcase: SHOWCASE_ORIGIN,
 }
 
-export { ORIGINS, JWT_SECRET };
+export { ORIGINS, JWT_SECRET, NODE_PRODUCTION };

@@ -77,6 +77,43 @@ ItemRouter.post("/create", async (req, res) => {
     }
 });
 
+ItemRouter.post("/getItemsWithFilters", (req, res) => {
+    const { branch_id, category, size_id, isDeleted } = req.body
+    let selectQuery =
+        "SELECT Item.*, GROUP_CONCAT(Size.size_dimension) AS sizes, GROUP_CONCAT(Item_Size.size_id) AS size_id FROM Item LEFT JOIN Item_Size ON Item.item_id = Item_Size.item_id LEFT JOIN Size ON Item_Size.size_id = Size.size_id WHERE 1=1"
+    const params = [];
+    
+    if (branch_id) {
+        selectQuery += ' AND branch_id = ?';
+        params.push(branch_id);
+    }
+
+    if (category) {
+        selectQuery += ' AND category = ?';
+        params.push(category);
+    }
+
+    if (size_id) {
+        selectQuery += ' AND Size.size_id = ?';
+        params.push(size_id);
+    }
+
+    if (isDeleted !== undefined) {
+        selectQuery += ' AND isDeleted = ?';
+        params.push(isDeleted);
+    }
+
+    selectQuery += ' GROUP BY Item.item_id';
+
+    db.query(selectQuery, params, (err, result) => {
+        if (err) {
+            console.error(err)
+            return res.status(500).json({ error: "Failed to retrieve items" });
+        }
+        return res.status(200).json(result)
+    })
+});
+
 // Get all items with sizes
 ItemRouter.get("/", (req, res) => {
     const selectQuery =

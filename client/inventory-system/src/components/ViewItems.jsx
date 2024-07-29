@@ -4,7 +4,6 @@ import ItemService from '../services/ItemService';
 import BranchService from '../services/BranchService';
 import Layout from './Layout';
 import ItemForm from './ItemForm';
-import TokenDecoder from '../services/TokenDecoder';
 import '../css/ViewItemsCSS.css';
 import TokenService from '../services/TokenService';
 

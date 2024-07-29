@@ -1,7 +1,7 @@
 import express from "express";
 import jwt from 'jsonwebtoken';
 import bcrypt from 'bcrypt';
-import { JWT_SECRET } from '../config.js'
+import { JWT_SECRET, NODE_PRODUCTION } from '../config.js'
 import db from '../db.js'
 
 const LoginRouter = express.Router();
@@ -70,12 +70,16 @@ LoginRouter.post('/login', (req, res) => {
                 const now = new Date();
                 const expireDate = new Date(now.getTime() + 24 * 60 * 60 * 1000); // 1 day
 
+                console.log(NODE_PRODUCTION)
+
                 res.cookie('token', token, {
                     path: "/",
                     expires: expireDate,
                     httpOnly: true,
-                    secure: true,
-                    sameSite: "None"
+                    secure: NODE_PRODUCTION,
+                    if(NODE_PRODUCTION) {
+                        sameSite: "None"
+                    }
                 });
                 
                 return res.json({Status: "Success", admin});
@@ -91,8 +95,8 @@ LoginRouter.post('/login', (req, res) => {
 
 LoginRouter.get('/logout', (req, res) => {
     res.cookie('token', '', {
-        httpOnly: true,
-        secure: true,
+        httpOnly: NODE_PRODUCTION,
+        secure: NODE_PRODUCTION,
         expires: new Date(0), // Set expiration date in the past
         sameSite: 'None' // Adjust according to your needs
     });

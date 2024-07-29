@@ -7,6 +7,13 @@ import '../css/ViewItemsCSS.css';
 
 const ViewAll = () => {
     const [items, setItems] = useState([]);
+    const [filters, setFilters] = useState({
+        branch_id: '',
+        category: '',
+        size_id: '',
+        isDeleted: false,
+    })
+    const [sizes, setSizes] = useState([]);
     const [branches, setBranches] = useState([]);
     const [selectedBranch, setSelectedBranch] = useState('');
     const [withDeleted, setWithDeleted] = useState(false);
@@ -14,43 +21,50 @@ const ViewAll = () => {
     useEffect(() => {
         fetchItems();
         fetchBranches();
-    }, [withDeleted]);
+        fetchSizes();
+    }, [filters]);
 
     const fetchItems = async () => {
         try {
-            const response = withDeleted
-                ? await ItemService.getAllWithDeleted()
-                : await ItemService.getAllItems();
-            
-            // Sort items: non-deleted items first, then deleted items
-            const sortedItems = response.data.sort((a, b) => {
-                if (a.isDeleted === b.isDeleted) return 0;
-                return a.isDeleted ? 1 : -1;
-            });
-
-            setItems(sortedItems);
+            const response = await ItemService.getAllItemsWithFilters(filters);
+            setItems(response.data);
         } catch (error) {
-            console.error('Error fetching items:', error);
+            console.error("Error fetching items:", error)
         }
+    };
+
+    const handleFilterChange = (e) => {
+        const { name, value } = e.target;
+        setFilters(
+            prevFilters => ({
+                ...prevFilters,
+                [name]: value
+            }));
     };
 
     const fetchBranches = async () => {
         try {
-            const response = await BranchService.getAllBranchWithDeleted();
+            const response = await BranchService.getAllBranches();
             setBranches(response.data);
         } catch (error) {
             console.error('Error fetching branches:', error);
         }
     };
 
+    const fetchSizes = async() => {
+        try {
+            const response = await ItemService.getSizes();
+            setSizes(response.data)
+        } catch (error) {
+            console.error('Error fetching sizes:', error);
+        }
+    }
+
     const getBranchName = (branch_id) => {
         const branch = branches.find(b => b.branch_id === branch_id);
         return branch ? branch.branch_name : 'Unknown Branch';
     };
 
-    const handleBranchFilterChange = (event) => {
-        setSelectedBranch(event.target.value);
-    };
 
     const filteredItems = items.filter(item => {
         if (selectedBranch && item.branch_id.toString() !== selectedBranch) {
@@ -58,10 +72,6 @@ const ViewAll = () => {
         }
         return true;
     });
-
-    const toggleWithDeleteItems = () => {
-        setWithDeleted(prevState => !prevState);
-    };
 
     return (
         <Layout>
@@ -72,7 +82,7 @@ const ViewAll = () => {
                         <Row className="align-items-center">
                             <Col md={3}>
                                 <Form.Label>Branch:</Form.Label>
-                                <Form.Control as="select" defaultValue="" onChange={handleBranchFilterChange}>
+                                <Form.Control as="select" name="branch_id" onChange={handleFilterChange}>
                                     <option value="">All Branches</option>
                                     {branches.map(branch => (
                                         <option key={branch.branch_id} value={branch.branch_id.toString()}>
@@ -81,15 +91,27 @@ const ViewAll = () => {
                                     ))}
                                 </Form.Control>
                             </Col>
-                            <Col md={3}>
-                                <Form.Label>&nbsp;</Form.Label> {/* This label is for spacing */}
-                                <div
-                                    onClick={toggleWithDeleteItems}
-                                    className="form-control"
-                                    style={{ cursor: 'pointer', textAlign: 'center' }}
-                                >
-                                    {withDeleted ? 'Hide Deleted Items' : 'Show Deleted Items'}
-                                </div>
+                            <Col md={2}>
+                                <Form.Label>Category:</Form.Label>
+                                <Form.Control type="text" autoComplete='off' name="category" defaultValue="" value={filters.category} onChange={handleFilterChange} />
+                            </Col>
+                            <Col md={1}>
+                                <Form.Label>Size:</Form.Label>
+                                <Form.Control as="select" name="size_id" defaultValue="" onChange={handleFilterChange}>
+                                    <option value="">All Sizes</option>
+                                    {sizes.map(size => (
+                                        <option key={size.size_id} value={size.size_id.toString()}>
+                                            {size.size_dimension}
+                                        </option>
+                                    ))}
+                                </Form.Control>
+                            </Col>
+                            <Col md={2}>
+                                <Form.Label>Show Deleted:</Form.Label>
+                                <Form.Check type="checkbox" name="isDeleted" checked={filters.isDeleted} onChange={() => setFilters(prevFilters => ({
+                                    ...prevFilters,
+                                    isDeleted: !prevFilters.isDeleted
+                                }))}/>
                             </Col>
                         </Row>
                     </Form.Group>
@@ -102,8 +124,8 @@ const ViewAll = () => {
                                     <th>Photo</th>
                                     <th>Name</th>
                                     <th>Description</th>
-                                    <th>Sizes</th>
                                     <th>Category</th>
+                                    <th>Sizes</th>
                                     <th>Quantity</th>
                                     <th>Price</th>
                                     <th>Branch</th>
@@ -111,7 +133,7 @@ const ViewAll = () => {
                                 </tr>
                             </thead>
                             <tbody>
-                                {filteredItems.map((item, index) => (
+                                {items.map((item, index) => (
                                     <tr key={item.item_id}>
                                         <td>{item.item_id}</td>
                                         <td>

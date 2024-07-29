@@ -8,10 +8,15 @@ const ItemService = {
     getAllItems: async () => {
         return await axios.get(API_URL);
     },
+
+    getAllItemsWithFilters: async (itemFilters) => {
+        console.log(itemFilters)
+        return await axios.post(`${API_URL}/getItemsWithFilters`, itemFilters);
+    },
     
     // Get all items including deleted ones
     getAllWithDeleted: async () => {
-        return await axios.get(`${API_URL}/getAllWithDeleted`); // Fixed the typo in the URL
+        return await axios.get(`${API_URL}/getAllWithDeleted`);
     },
     
     // Get items from a specific branch
