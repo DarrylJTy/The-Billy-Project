@@ -78,9 +78,9 @@ LoginRouter.post('/login', (req, res) => {
                 }
 
                 if (NODE_PRODUCTION) {
-                    cookieOptions.sameSit = "None";
+                    cookieOptions.sameSite = "None";
                 } else {
-                    cookieOptions.sameSit = "Lax";
+                    cookieOptions.sameSite = "Lax";
                 }
 
                 res.cookie('token', token, cookieOptions);
