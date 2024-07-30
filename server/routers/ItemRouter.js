@@ -71,33 +71,6 @@ ItemRouter.post("/create", async (req, res) => {
     }
 });
 
-// Get all items with sizes
-ItemRouter.get("/", (req, res) => {
-    const selectQuery =
-        "SELECT Item.*, GROUP_CONCAT(Size.size_dimension) AS sizes FROM Item LEFT JOIN Item_Size ON Item.item_id = Item_Size.item_id LEFT JOIN Size ON Item_Size.size_id = Size.size_id WHERE Item.isDeleted = 0 GROUP BY Item.item_id";
-    
-    db.query(selectQuery, (err, result) => {
-        if (err) {
-            console.error(err);
-            return res.status(500).json({ error: "Failed to retrieve items" });
-        }
-        return res.status(200).json(result);
-    });
-});
-
-// Get all items including deleted
-ItemRouter.get("/getAllWithDeleted", (req, res) => {
-    const selectQuery =
-        "SELECT Item.*, GROUP_CONCAT(Size.size_dimension) AS sizes FROM Item LEFT JOIN Item_Size ON Item.item_id = Item_Size.item_id LEFT JOIN Size ON Item_Size.size_id = Size.size_id GROUP BY Item.item_id";
-
-    db.query(selectQuery, (err, result) => {
-        if (err) {
-            console.error(err);
-            return res.status(500).json({ error: "Failed to retrieve items" });
-        }
-        return res.status(200).json(result);
-    });
-});
 
 ItemRouter.post("/getItemsWithFilters", (req, res) => {
     const { item_name, branch_id, category, size_id, isDeleted } = req.body;
@@ -189,10 +162,108 @@ ItemRouter.post("/getItemsWithFilters", (req, res) => {
 
         // Convert the accumulator object to an array
         const formattedResult = Object.values(items);
+
         return res.status(200).json(formattedResult);
     });
 });
 
+
+// Get all items with sizes
+ItemRouter.get("/", (req, res) => {
+    const selectQuery =
+        "SELECT Item.*, GROUP_CONCAT(Size.size_dimension) AS sizes FROM Item LEFT JOIN Item_Size ON Item.item_id = Item_Size.item_id LEFT JOIN Size ON Item_Size.size_id = Size.size_id WHERE Item.isDeleted = 0 GROUP BY Item.item_id";
+    
+    db.query(selectQuery, (err, result) => {
+        if (err) {
+            console.error(err);
+            return res.status(500).json({ error: "Failed to retrieve items" });
+        }
+        return res.status(200).json(result);
+    });
+});
+
+// Get all items including deleted
+ItemRouter.get("/getAllWithDeleted", (req, res) => {
+    const selectQuery =
+        "SELECT Item.*, GROUP_CONCAT(Size.size_dimension) AS sizes FROM Item LEFT JOIN Item_Size ON Item.item_id = Item_Size.item_id LEFT JOIN Size ON Item_Size.size_id = Size.size_id GROUP BY Item.item_id";
+
+    db.query(selectQuery, (err, result) => {
+        if (err) {
+            console.error(err);
+            return res.status(500).json({ error: "Failed to retrieve items" });
+        }
+        return res.status(200).json(result);
+    });
+});
+
+// Get items from a specific branch
+ItemRouter.post("/getFromBranch", (req, res) => {
+    const { branch_id } = req.body;
+
+    // SQL query to fetch items with detailed size information
+    const selectQuery = `
+        SELECT 
+            Item.item_id,
+            Item.item_name,
+            Item.description,
+            Item.category,
+            Item.item_image,
+            Item.branch_id,
+            Item.isDeleted,
+            Size.size_id,
+            Size.size_dimension,
+            Item_Data.quantity,
+            Item_Data.price
+        FROM Item
+        LEFT JOIN Item_Data ON Item.item_id = Item_Data.item_id
+        LEFT JOIN Size ON Item_Data.size_id = Size.size_id
+        WHERE Item.branch_id = ? AND Item.isDeleted = 0
+        ORDER BY Item.item_id, Size.size_id
+    `;
+
+    db.query(selectQuery, [branch_id], (err, result) => {
+        if (err) {
+            console.error(err);
+            return res.status(500).json({ error: "Failed to retrieve items" });
+        }
+
+        // Process result to group sizes, quantities, and prices
+        const items = result.reduce((acc, row) => {
+            // Check if item already exists in the accumulator
+            if (!acc[row.item_id]) {
+                acc[row.item_id] = {
+                    item_id: row.item_id,
+                    item_name: row.item_name,
+                    description: row.description,
+                    category: row.category,
+                    item_image: row.item_image,
+                    sizes: []
+                };
+            }
+
+            // Push size details if available
+            if (row.size_id || row.size_id === 0) {
+                acc[row.item_id].sizes.push({
+                    size_id: row.size_id,
+                    size_dimension: row.size_dimension,
+                    quantity: row.quantity,
+                    price: row.price
+                });
+            }
+
+
+            return acc;
+        }, {});
+
+        console.log("items:", items)
+
+        // Convert the accumulator object to an array
+        const formattedResult = Object.values(items);
+
+
+        return res.status(200).json(formattedResult);
+    });
+});
 
 
 const getInitialSizes = async (item_id) => {

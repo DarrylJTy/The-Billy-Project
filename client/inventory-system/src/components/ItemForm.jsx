@@ -49,6 +49,11 @@ const ItemForm = ({ showModal, handleCloseModal, isUpdateMode, selectedItem, fet
                 return size.size_id; 
             });
 
+            // Ensure size_id 0 is included if the category is not "tiles"
+            if (selectedItem.category.toLowerCase() !== 'tiles') {
+                sizeDetails["0"] = sizeDetails["0"] || { quantity: '', price: '' };
+            }
+
             setSelectedSizes(selectedSizes);
             setSizeDetails(sizeDetails);
         } else {
@@ -66,10 +71,24 @@ const ItemForm = ({ showModal, handleCloseModal, isUpdateMode, selectedItem, fet
     const handleTextChange = (e) => {
         const { name, value } = e.target;
         setItemData({ ...itemData, [name]: value });
+
+        // Clear sizes selection if category is not "tiles"
+        if (name === 'category' && value !== 'tiles') {
+            setSelectedSizes(['0']); // Always include size_id 0 for non-tile categories
+            setSizeDetails({
+                '0': sizeDetails['0'] || { quantity: '', price: '' }
+            });
+        } else if (name === 'category' && value === 'tiles') {
+            setSelectedSizes([]);
+            setSizeDetails({});
+        }
     };
 
     const handleCheckboxChange = (size_id) => {
         setSelectedSizes(prev => {
+            if (size_id === '0') {
+                return [size_id]; // Only size_id 0 for non-tile categories
+            }
             if (prev.includes(size_id)) {
                 return prev.filter(size => size !== size_id);
             } else {
@@ -79,28 +98,28 @@ const ItemForm = ({ showModal, handleCloseModal, isUpdateMode, selectedItem, fet
     };
 
     const handleSizeDetailChange = (size_id, e) => {
-    const { name, value } = e.target;
+        const { name, value } = e.target;
 
-    // Convert value to a number
-    const numericValue = parseFloat(value);
+        // Convert value to a number
+        const numericValue = parseFloat(value);
 
-    // Define minimum values
-    const minValues = {
-        quantity: 0,
-        price: 0.00
+        // Define minimum values
+        const minValues = {
+            quantity: 0,
+            price: 0.00
+        };
+
+        // Apply minimum value restrictions
+        const validatedValue = numericValue < minValues[name] ? minValues[name] : numericValue;
+
+        setSizeDetails(prev => ({
+            ...prev,
+            [size_id]: {
+                ...prev[size_id],
+                [name]: validatedValue
+            }
+        }));
     };
-
-    // Apply minimum value restrictions
-    const validatedValue = numericValue < minValues[name] ? minValues[name] : numericValue;
-
-    setSizeDetails(prev => ({
-        ...prev,
-        [size_id]: {
-            ...prev[size_id],
-            [name]: validatedValue
-        }
-    }));
-};
 
     const handleImageChange = (e) => {
         setItemImage(e.target.files[0]);
@@ -122,7 +141,6 @@ const ItemForm = ({ showModal, handleCloseModal, isUpdateMode, selectedItem, fet
 
             // Convert sizeDetails to the format required by your API, if necessary
             const sizesArray = Object.keys(sizeDetails)
-                .filter(size => selectedSizes.includes(Number(size))) // Filter based on selectedSizes
                 .map(size => ({
                     size_id: Number(size), // Convert size_id to number if it's a string
                     quantity: sizeDetails[size].quantity,
@@ -137,8 +155,6 @@ const ItemForm = ({ showModal, handleCloseModal, isUpdateMode, selectedItem, fet
             };
 
             if (isUpdateMode) {
-                console.log("sizesArray:", sizesArray)
-                console.log(updatedItem.sizes)
                 await ItemService.updateItem({ ...updatedItem, item_id: selectedItem.item_id });
             } else {
                 await ItemService.createItem(updatedItem);
@@ -201,58 +217,85 @@ const ItemForm = ({ showModal, handleCloseModal, isUpdateMode, selectedItem, fet
                         />
                     </Form.Group>
                     <Form.Group controlId="sizes">
-                        <Form.Label>Sizes</Form.Label>
-                        <div>
-                            {sizes.length > 0 ? (
-                                sizes.map(size => (
-                                    <div key={size.size_id} className="mb-2">
-                                        <Form.Check
-                                            type="checkbox"
-                                            label={size.size_dimension}
-                                            value={size.size_id}
-                                            checked={selectedSizes.includes(size.size_id)}
-                                            onChange={(e) => handleCheckboxChange(size.size_id, e)}
-                                        />
-                                        {selectedSizes.includes(size.size_id) && (
-                                            <div className="d-flex mt-2">
-                                                <Form.Control
-                                                    type="number"
-                                                    placeholder="Quantity"
-                                                    name="quantity"
-                                                    min="0"
-                                                    value={sizeDetails[size.size_id]?.quantity || ''}
-                                                    onChange={(e) => handleSizeDetailChange(size.size_id, e)}
+                        {itemData.category.toLowerCase() === 'tiles' ? (
+                            <>
+                                <Form.Label>Sizes</Form.Label>
+                                <div>
+                                    {sizes.length > 0 ? (
+                                        sizes.map(size => (
+                                            <div key={size.size_id} className="mb-2">
+                                                <Form.Check
+                                                    type="checkbox"
+                                                    label={size.size_dimension}
+                                                    value={size.size_id}
+                                                    checked={selectedSizes.includes(size.size_id)}
+                                                    onChange={() => handleCheckboxChange(size.size_id)}
                                                 />
-                                                <Form.Control
-                                                    type="number"
-                                                    step="0.01"
-                                                    placeholder="Price"
-                                                    name="price"
-                                                    min="0"
-                                                    value={sizeDetails[size.size_id]?.price || ''}
-                                                    onChange={(e) => handleSizeDetailChange(size.size_id, e)}
-                                                    className="ml-2"
-                                                />
+                                                {selectedSizes.includes(size.size_id) && (
+                                                    <div className="d-flex mt-2">
+                                                        <Form.Control
+                                                            type="number"
+                                                            placeholder="Quantity"
+                                                            name="quantity"
+                                                            min="0"
+                                                            value={sizeDetails[size.size_id]?.quantity || ''}
+                                                            onChange={(e) => handleSizeDetailChange(size.size_id, e)}
+                                                        />
+                                                        <Form.Control
+                                                            type="number"
+                                                            step="0.01"
+                                                            placeholder="Price"
+                                                            name="price"
+                                                            min="0"
+                                                            value={sizeDetails[size.size_id]?.price || ''}
+                                                            onChange={(e) => handleSizeDetailChange(size.size_id, e)}
+                                                            className="ml-2"
+                                                        />
+                                                    </div>
+                                                )}
                                             </div>
-                                        )}
-                                    </div>
-                                ))
-                            ) : (
-                                <div>No sizes available</div>
-                            )}
-                        </div>
+                                        ))
+                                    ) : (
+                                        <div>No sizes available</div>
+                                    )}
+                                </div>
+                            </>
+                        ) : (
+                            <>
+                                <Form.Label>Size not applicable for {itemData.category.toLowerCase()}</Form.Label>
+                                <div className="d-flex mt-2">
+                                    <Form.Control
+                                        type="number"
+                                        placeholder="Quantity"
+                                        name="quantity"
+                                        min="0"
+                                        value={sizeDetails['0']?.quantity || ''}
+                                        onChange={(e) => handleSizeDetailChange('0', e)}
+                                    />
+                                    <Form.Control
+                                        type="number"
+                                        step="0.01"
+                                        placeholder="Price"
+                                        name="price"
+                                        min="0"
+                                        value={sizeDetails['0']?.price || ''}
+                                        onChange={(e) => handleSizeDetailChange('0', e)}
+                                        className="ml-2"
+                                    />
+                                </div>
+                            </>
+                        )}
                     </Form.Group>
-                    <Form.Group controlId="item_image">
-                        <Form.Label>Photo</Form.Label>
+                    <Form.Group controlId="itemImage">
+                        <Form.Label>Item Image</Form.Label>
                         <Form.Control
                             type="file"
-                            name="item_image"
-                            onChange={handleImageChange}
                             accept="image/*"
+                            onChange={handleImageChange}
                         />
                     </Form.Group>
-                    <Button variant="primary" type="submit" className="mt-2">
-                        {isUpdateMode ? 'Update Item' : 'Add Item'}
+                    <Button variant="primary" type="submit">
+                        {isUpdateMode ? 'Update' : 'Add'} Item
                     </Button>
                 </Form>
             </Modal.Body>

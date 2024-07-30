@@ -47,7 +47,6 @@ const ViewAll = () => {
             ...prevFilters,
             [name]: value
         }));
-        console.log("filters:", filters.item_name)
     };
 
     const fetchBranches = async () => {
