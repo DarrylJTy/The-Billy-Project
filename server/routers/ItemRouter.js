@@ -43,8 +43,6 @@ ItemRouter.post("/create", async (req, res) => {
                 }
             });
        });
-        
-        console.log(sizes)
 
         // Prepare item sizes for insertion
         const itemSizesQueries = Object.entries(sizes).map(([index, {size_id, quantity, price }]) => {
@@ -78,13 +76,7 @@ ItemRouter.post("/getItemsWithFilters", (req, res) => {
     // Base SQL query to fetch items along with their sizes, quantities, and prices
     let selectQuery = `
         SELECT 
-            Item.item_id,
-            Item.item_name,
-            Item.description,
-            Item.category,
-            Item.item_image,
-            Item.branch_id,
-            Item.isDeleted,
+            Item.*,
             Size.size_id,
             Size.size_dimension,
             Item_Data.quantity,
@@ -133,6 +125,10 @@ ItemRouter.post("/getItemsWithFilters", (req, res) => {
 
         // Process result to group sizes, quantities, and prices
         const items = result.reduce((acc, row) => {
+             const formatDate = (date) => {
+                return new Date(date).toLocaleDateString('en-PH');
+            };
+
             // Check if item already exists in the accumulator
             if (!acc[row.item_id]) {
                 acc[row.item_id] = {
@@ -142,13 +138,16 @@ ItemRouter.post("/getItemsWithFilters", (req, res) => {
                     category: row.category,
                     item_image: row.item_image,
                     branch_id: row.branch_id,
+                    created_at: formatDate(row.created_at),
+                    updated_at: formatDate(row.updated_at),
                     isDeleted: row.isDeleted,
                     sizes: []
                 };
             }
 
             // Push size details if available
-            if (row.size_id) {
+            if (row.size_id || row.size_id == 0) {
+                console.log("ran", size_id)
                 acc[row.item_id].sizes.push({
                     size_id: row.size_id,
                     size_dimension: row.size_dimension,
@@ -163,108 +162,11 @@ ItemRouter.post("/getItemsWithFilters", (req, res) => {
         // Convert the accumulator object to an array
         const formattedResult = Object.values(items);
 
-        return res.status(200).json(formattedResult);
-    });
-});
-
-
-// Get all items with sizes
-ItemRouter.get("/", (req, res) => {
-    const selectQuery =
-        "SELECT Item.*, GROUP_CONCAT(Size.size_dimension) AS sizes FROM Item LEFT JOIN Item_Size ON Item.item_id = Item_Size.item_id LEFT JOIN Size ON Item_Size.size_id = Size.size_id WHERE Item.isDeleted = 0 GROUP BY Item.item_id";
-    
-    db.query(selectQuery, (err, result) => {
-        if (err) {
-            console.error(err);
-            return res.status(500).json({ error: "Failed to retrieve items" });
-        }
-        return res.status(200).json(result);
-    });
-});
-
-// Get all items including deleted
-ItemRouter.get("/getAllWithDeleted", (req, res) => {
-    const selectQuery =
-        "SELECT Item.*, GROUP_CONCAT(Size.size_dimension) AS sizes FROM Item LEFT JOIN Item_Size ON Item.item_id = Item_Size.item_id LEFT JOIN Size ON Item_Size.size_id = Size.size_id GROUP BY Item.item_id";
-
-    db.query(selectQuery, (err, result) => {
-        if (err) {
-            console.error(err);
-            return res.status(500).json({ error: "Failed to retrieve items" });
-        }
-        return res.status(200).json(result);
-    });
-});
-
-// Get items from a specific branch
-ItemRouter.post("/getFromBranch", (req, res) => {
-    const { branch_id } = req.body;
-
-    // SQL query to fetch items with detailed size information
-    const selectQuery = `
-        SELECT 
-            Item.item_id,
-            Item.item_name,
-            Item.description,
-            Item.category,
-            Item.item_image,
-            Item.branch_id,
-            Item.isDeleted,
-            Size.size_id,
-            Size.size_dimension,
-            Item_Data.quantity,
-            Item_Data.price
-        FROM Item
-        LEFT JOIN Item_Data ON Item.item_id = Item_Data.item_id
-        LEFT JOIN Size ON Item_Data.size_id = Size.size_id
-        WHERE Item.branch_id = ? AND Item.isDeleted = 0
-        ORDER BY Item.item_id, Size.size_id
-    `;
-
-    db.query(selectQuery, [branch_id], (err, result) => {
-        if (err) {
-            console.error(err);
-            return res.status(500).json({ error: "Failed to retrieve items" });
-        }
-
-        // Process result to group sizes, quantities, and prices
-        const items = result.reduce((acc, row) => {
-            // Check if item already exists in the accumulator
-            if (!acc[row.item_id]) {
-                acc[row.item_id] = {
-                    item_id: row.item_id,
-                    item_name: row.item_name,
-                    description: row.description,
-                    category: row.category,
-                    item_image: row.item_image,
-                    sizes: []
-                };
-            }
-
-            // Push size details if available
-            if (row.size_id || row.size_id === 0) {
-                acc[row.item_id].sizes.push({
-                    size_id: row.size_id,
-                    size_dimension: row.size_dimension,
-                    quantity: row.quantity,
-                    price: row.price
-                });
-            }
-
-
-            return acc;
-        }, {});
-
-        console.log("items:", items)
-
-        // Convert the accumulator object to an array
-        const formattedResult = Object.values(items);
-
+        console.log(items)
 
         return res.status(200).json(formattedResult);
     });
 });
-
 
 const getInitialSizes = async (item_id) => {
     return new Promise((resolve, reject) => {
@@ -300,20 +202,22 @@ ItemRouter.post('/update', async (req, res) => {
         description,
         category,
         item_image,
-        sizes // Array of size objects: [{ size_id: 1, quantity: 5, price: 10.00 }, ...]
-    } = req.body;
+        sizes
+    } = req.body; 
+    const updated_at = new Date()
 
     try {
         // Update Item table
         const updateItemQuery = `
             UPDATE Item 
-            SET item_name = ?, description = ?, category = ?, item_image = ? 
+            SET item_name = ?, description = ?, category = ?, item_image = ?, updated_at = ?
             WHERE item_id = ?`;
         await db.query(updateItemQuery, [
             item_name,
             description,
             category,
             item_image,
+            updated_at,
             item_id
         ]);
 
@@ -347,10 +251,6 @@ ItemRouter.post('/update', async (req, res) => {
                 price: size.price
             });
         });
-
-        console.log("sizes:", sizes)
-        console.log("initialSizesMap", initialSizesMap)
-        console.log("updatedSizesMap:", updatedSizesMap)
 
         // Find sizes to delete (initial sizes not in updated sizes)
         const sizesToDelete = Array.from(initialSizesMap.keys())
@@ -427,9 +327,17 @@ ItemRouter.post('/update', async (req, res) => {
 
 // Delete an item
 ItemRouter.post("/delete", (req, res) => {
-    const item_id = req.body.item_id;
-    const deleteQuery = "UPDATE Item SET isDeleted = ? WHERE item_id = ?";
-    db.query(deleteQuery, [true, item_id], (err, result) => {
+    const { item_id, item_name } = req.body;
+    const updated_at = new Date();
+
+    // Ensure the item_name includes "(Deleted)"
+    const updatedItemName = item_name.includes("(Deleted)") 
+        ? item_name 
+        : `${item_name} (Deleted)`;
+
+    // Query to update the item
+    const updateQuery = "UPDATE Item SET item_name = ?, isDeleted = ? updated_at = ? WHERE item_id = ?";
+    db.query(updateQuery, [updatedItemName, true, item_id, updated_at], (err, result) => {
         if (err) {
             console.error(err);
             return res.status(500).json({ error: "Failed to delete item" });
@@ -437,6 +345,7 @@ ItemRouter.post("/delete", (req, res) => {
         return res.status(200).json({ message: "Item deleted successfully" });
     });
 });
+
 
 // Get all sizes
 ItemRouter.get("/sizes", (req, res) => {

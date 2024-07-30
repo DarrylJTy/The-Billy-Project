@@ -35,8 +35,8 @@ const ItemService = {
     },
     
     // Delete an item
-    deleteItem: async (item_id) => {
-        return await axios.post(`${API_URL}/delete`, { item_id });
+    deleteItem: async (item_id, item_name) => {
+        return await axios.post(`${API_URL}/delete`, { item_id, item_name });
     },
     
     // Get all sizes

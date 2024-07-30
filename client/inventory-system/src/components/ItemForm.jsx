@@ -51,9 +51,8 @@ const ItemForm = ({ showModal, handleCloseModal, isUpdateMode, selectedItem, fet
 
             // Ensure size_id 0 is included if the category is not "tiles"
             if (selectedItem.category.toLowerCase() !== 'tiles') {
-                sizeDetails["0"] = sizeDetails["0"] || { quantity: '', price: '' };
+                sizeDetails[0] = sizeDetails[0] || { quantity: 0, price: 0.00 };
             }
-
             setSelectedSizes(selectedSizes);
             setSizeDetails(sizeDetails);
         } else {
@@ -64,7 +63,6 @@ const ItemForm = ({ showModal, handleCloseModal, isUpdateMode, selectedItem, fet
                 item_image: '',
             });
             setSelectedSizes([]);
-            setSizeDetails({});
         }
     }, [selectedItem, isUpdateMode]);
 
@@ -72,11 +70,10 @@ const ItemForm = ({ showModal, handleCloseModal, isUpdateMode, selectedItem, fet
         const { name, value } = e.target;
         setItemData({ ...itemData, [name]: value });
 
-        // Clear sizes selection if category is not "tiles"
         if (name === 'category' && value !== 'tiles') {
-            setSelectedSizes(['0']); // Always include size_id 0 for non-tile categories
+            setSelectedSizes([0]); // Always include size_id 0 for non-tile categories
             setSizeDetails({
-                '0': sizeDetails['0'] || { quantity: '', price: '' }
+                0: sizeDetails[0] || { quantity: 0, price: 0.00 }
             });
         } else if (name === 'category' && value === 'tiles') {
             setSelectedSizes([]);
@@ -86,19 +83,21 @@ const ItemForm = ({ showModal, handleCloseModal, isUpdateMode, selectedItem, fet
 
     const handleCheckboxChange = (size_id) => {
         setSelectedSizes(prev => {
-            if (size_id === '0') {
-                return [size_id]; // Only size_id 0 for non-tile categories
-            }
-            if (prev.includes(size_id)) {
-                return prev.filter(size => size !== size_id);
-            } else {
-                return [...prev, size_id];
-            }
+            const newSelectedSizes = size_id === '0'
+                ? (prev.includes(size_id) ? [] : [size_id])
+                : (prev.includes(size_id) ? prev.filter(size => size !== size_id) : [...prev, size_id]);
+            
+            return newSelectedSizes;
         });
     };
 
+
     const handleSizeDetailChange = (size_id, e) => {
         const { name, value } = e.target;
+
+        if (size_id === 0) {
+            setSelectedSizes([0])
+        }
 
         // Convert value to a number
         const numericValue = parseFloat(value);
@@ -127,6 +126,7 @@ const ItemForm = ({ showModal, handleCloseModal, isUpdateMode, selectedItem, fet
 
     const handleSubmit = async (e) => {
         e.preventDefault();
+
         try {
             let imageURL = itemData.item_image;
             const branch = await BranchService.getSpecificBranchName(branch_id);
@@ -139,10 +139,19 @@ const ItemForm = ({ showModal, handleCloseModal, isUpdateMode, selectedItem, fet
                 imageURL = await getDownloadURL(storageRef);
             }
 
-            // Convert sizeDetails to the format required by your API, if necessary
+            if (selectedSizes && itemData.category !== 'tiles') {
+                setSelectedSizes([0]);
+                setSizeDetails({
+                    0: sizeDetails[0] || { quantity: 0, price: 0.00 }
+                });
+                console.log("THIS RAN:", selectedSizes)
+                console.log(sizeDetails)
+            }
+
             const sizesArray = Object.keys(sizeDetails)
+                .filter(size => selectedSizes.includes(Number(size))) // SelectedSizes checker to remove unselected sizes
                 .map(size => ({
-                    size_id: Number(size), // Convert size_id to number if it's a string
+                    size_id: Number(size), 
                     quantity: sizeDetails[size].quantity,
                     price: sizeDetails[size].price
                 }));
@@ -157,6 +166,7 @@ const ItemForm = ({ showModal, handleCloseModal, isUpdateMode, selectedItem, fet
             if (isUpdateMode) {
                 await ItemService.updateItem({ ...updatedItem, item_id: selectedItem.item_id });
             } else {
+                console.log(updatedItem)
                 await ItemService.createItem(updatedItem);
             }
 
@@ -222,7 +232,7 @@ const ItemForm = ({ showModal, handleCloseModal, isUpdateMode, selectedItem, fet
                                 <Form.Label>Sizes</Form.Label>
                                 <div>
                                     {sizes.length > 0 ? (
-                                        sizes.map(size => (
+                                        sizes.filter(size => size.size_id !== 0).map(size => (
                                             <div key={size.size_id} className="mb-2">
                                                 <Form.Check
                                                     type="checkbox"
@@ -262,25 +272,27 @@ const ItemForm = ({ showModal, handleCloseModal, isUpdateMode, selectedItem, fet
                             </>
                         ) : (
                             <>
-                                <Form.Label>Size not applicable for {itemData.category.toLowerCase()}</Form.Label>
+                                <Form.Text className="text-muted">No sizes required for this category.</Form.Text>
                                 <div className="d-flex mt-2">
                                     <Form.Control
                                         type="number"
                                         placeholder="Quantity"
                                         name="quantity"
                                         min="0"
-                                        value={sizeDetails['0']?.quantity || ''}
-                                        onChange={(e) => handleSizeDetailChange('0', e)}
+                                        value={sizeDetails[0]?.quantity || 0}
+                                        onChange={(e) => handleSizeDetailChange(0, e)}
+                                        required={!isUpdateMode}
                                     />
                                     <Form.Control
                                         type="number"
                                         step="0.01"
                                         placeholder="Price"
                                         name="price"
-                                        min="0"
-                                        value={sizeDetails['0']?.price || ''}
-                                        onChange={(e) => handleSizeDetailChange('0', e)}
+                                        min="0.00"
+                                        value={sizeDetails[0]?.price || 0.00}
+                                        onChange={(e) => handleSizeDetailChange(0, e)}
                                         className="ml-2"
+                                        required={!isUpdateMode}
                                     />
                                 </div>
                             </>
@@ -294,7 +306,7 @@ const ItemForm = ({ showModal, handleCloseModal, isUpdateMode, selectedItem, fet
                             onChange={handleImageChange}
                         />
                     </Form.Group>
-                    <Button variant="primary" type="submit">
+                    <Button className="mt-2" variant="primary" type="submit">
                         {isUpdateMode ? 'Update' : 'Add'} Item
                     </Button>
                 </Form>

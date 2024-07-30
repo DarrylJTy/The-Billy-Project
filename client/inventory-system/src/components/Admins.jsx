@@ -107,7 +107,7 @@ function Admins() {
         <Layout>
             <div className="container-fluid vh-100 d-flex align-items-center justify-content-center">
                 <div className="col-md-10">
-                    <h2 className="text-left mb-4">Admin List</h2>
+                    <h2 className="text-left p-3 text-light bg-danger mb-0 rounded">Admin List</h2>
                     <div style={{ maxHeight: '500px', overflowY: 'auto' }}>
                         <Table striped bordered hover>
                             <thead>

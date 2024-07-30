@@ -37,32 +37,42 @@ BranchRouter.post("/create", (req, res) => {
 });
 
 // Gets all branches
-BranchRouter.get("/getBranches", (req, res) => {
-    const selectQuery = "SELECT * FROM Branch WHERE isDeleted = 0";
-	db.query(selectQuery, (err, result) => {
-		if (err) {
-			console.error(err);
-			return res
-				.status(500)
-				.json({ error: "Failed to retrieve branches" });
-		}
-		return res.status(200).json(result);
-	});
-})
+BranchRouter.post("/getBranches", (req, res) => {
+	const { branch_name, isDeleted } = req.body
 
-// Gets all branches
-BranchRouter.get("/getBranchesWithDeleted", (req, res) => {
-    const selectQuery = "SELECT * FROM Branch";
-	db.query(selectQuery, (err, result) => {
-		if (err) {
-			console.error(err);
-			return res
-				.status(500)
-				.json({ error: "Failed to retrieve branches" });
-		}
-		return res.status(200).json(result);
-	});
-})
+	console.log(req.body)
+
+	// Base SQL query to fetch branches
+    let selectQuery = `
+        SELECT * 
+        FROM Branch
+        WHERE 1=1
+    `;
+
+	const params = [];
+
+	 if (branch_name) {
+        selectQuery += ' AND branch_name LIKE ?';
+        params.push(`%${branch_name}%`);
+    }
+
+    if (isDeleted !== undefined) {
+        selectQuery += ' AND isDeleted = ?';
+        params.push(isDeleted);
+    }
+
+    // Order by branch_id for consistent results
+    selectQuery += ' ORDER BY branch_id';
+
+    // Execute the query
+    db.query(selectQuery, params, (err, result) => {
+        if (err) {
+            console.error(err);
+            return res.status(500).json({ error: "Failed to retrieve branches" });
+        }
+        return res.status(200).json(result);
+    });
+});
 
 // Gets specific branch
 BranchRouter.post("/getSpecificBranchName", (req, res) => {
@@ -85,7 +95,6 @@ BranchRouter.post("/update", (req, res) => {
 		branch_contact,
 		branch_id,
 	} = req.body;
-	// const updated_at = new Date();
 	console.log(req.body);
 
 	const updateQuery =
@@ -114,14 +123,14 @@ BranchRouter.post("/update", (req, res) => {
 	);
 });
 
-// Delete a Branch and flag related items and users as deleted
+// Delete a Branch and rename related items and users to include (deleted)
 BranchRouter.post("/delete", (req, res) => {
     const branch_id = req.body.branch_id;
 
-    // Queries to update the isDeleted flag
-    const deleteBranchQuery = "UPDATE Branch SET isDeleted = ? WHERE branch_id = ?";
-    const deleteItemsQuery = "UPDATE Item SET isDeleted = ? WHERE branch_id = ?";
-    const deleteUsersQuery = "UPDATE Admin SET isDeleted = ? WHERE branch_id = ?";
+    // Queries to update the name and isDeleted flag
+    const deleteBranchQuery = "UPDATE Branch SET branch_name = CONCAT(branch_name, ' (deleted)'), isDeleted = ? WHERE branch_id = ?";
+    const deleteItemsQuery = "UPDATE Item SET item_name = CONCAT(item_name, ' (deleted)'), isDeleted = ? WHERE branch_id = ?";
+    const deleteUsersQuery = "UPDATE Admin SET username = CONCAT(username, ' (deleted)'), isDeleted = ? WHERE branch_id = ?";
 
     // Start a transaction
     db.beginTransaction(err => {
@@ -130,7 +139,7 @@ BranchRouter.post("/delete", (req, res) => {
             return res.status(500).json({ error: "Failed to start transaction" });
         }
 
-        // Flag the branch as deleted
+        // Rename and flag the branch as deleted
         db.query(deleteBranchQuery, [true, branch_id], (err, result) => {
             if (err) {
                 return db.rollback(() => {
@@ -139,7 +148,7 @@ BranchRouter.post("/delete", (req, res) => {
                 });
             }
 
-            // Flag the related items as deleted
+            // Rename and flag the related items as deleted
             db.query(deleteItemsQuery, [true, branch_id], (err, result) => {
                 if (err) {
                     // Check if the error is due to a non-existing table
@@ -153,7 +162,7 @@ BranchRouter.post("/delete", (req, res) => {
                     }
                 }
 
-                // Flag the related users as deleted
+                // Rename and flag the related users as deleted
                 db.query(deleteUsersQuery, [true, branch_id], (err, result) => {
                     if (err) {
                         // Check if the error is due to a non-existing table
@@ -176,7 +185,7 @@ BranchRouter.post("/delete", (req, res) => {
                             });
                         }
 
-                        return res.status(200).json({ message: "Branch and related items/users deleted successfully" });
+                        return res.status(200).json({ message: "Branch and related items/users renamed and flagged as deleted successfully" });
                     });
                 });
             });

@@ -1,38 +1,49 @@
-import React, { useState, useEffect } from 'react'
-import { Table, Button, Modal, Form } from 'react-bootstrap';
+import React, { useState, useEffect } from 'react';
+import { Table, Button, Modal, Form, Row, Col } from 'react-bootstrap';
 import BranchService from '../services/BranchService';
-import Layout from './Layout'
+import Layout from './Layout';
 import { imgDB } from '../services/firebase';
-import { ref, uploadBytes, getDownloadURL  } from "firebase/storage";
+import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
+
+// Define regex for phone number and landline validation
+const PHONE_NUMBER_REGEX = /^0\d{10}$/;
+const LANDLINE_NUMBER_REGEX = /^\(?\d{2}\)?[\s-]?\d{4}[\s-]?\d{4}$/;
 
 function Branches() {
     const [branches, setBranches] = useState([]);
     const [showModal, setShowModal] = useState(false);
     const [isUpdateMode, setIsUpdateMode] = useState(false);
     const [selectedBranch, setSelectedBranch] = useState(null);
-    const [branch_image, setBranchImage]  = useState(null)
+    const [branch_image, setBranchImage] = useState(null);
     const [branchData, setBranchData] = useState({
         branch_name: '',
         branch_address: '',
         branch_contact: '',
         branch_image: '',
-    })
-;
+    });
+
+    // State for filters
+    const [filters, setFilters] = useState({
+        branch_name: '',
+        isDeleted: false,
+    });
+
     useEffect(() => {
         fetchBranches();
-    }, []);
+    }, [filters]);
 
     const fetchBranches = async () => {
         try {
-            const response = await BranchService.getAllBranches();
+            // Make sure the API endpoint and method accept these parameters
+            const response = await BranchService.getAllBranches(filters);
             setBranches(response.data);
         } catch (error) {
-            console.error('Error fetching items:', error);
+            console.error('Error fetching branches:', error);
         }
     };
 
     const handleShowModal = (branch) => {
-        if(branch) {
+        if (branch) {
             setIsUpdateMode(true);
             setSelectedBranch(branch);
             setBranchData({
@@ -41,7 +52,7 @@ function Branches() {
                 branch_address: branch.branch_address,
                 branch_contact: branch.branch_contact,
                 branch_image: '',
-            })
+            });
         } else {
             setIsUpdateMode(false);
             setBranchData({
@@ -52,13 +63,13 @@ function Branches() {
             });
         }
         setShowModal(true);
-        setBranchImage(null); // Reset image
+        setBranchImage(null);
     };
 
     const handleCloseModal = () => {
         setShowModal(false);
         setIsUpdateMode(false);
-        setSelectedBranch(null); 
+        setSelectedBranch(null);
     };
 
     const handleUpdate = async (updatedBranchData) => {
@@ -69,44 +80,54 @@ function Branches() {
                 const storageRef = ref(imgDB, "Branch-Images/" + branch_image.name);
                 await uploadBytes(storageRef, branch_image);
                 imageURL = await getDownloadURL(storageRef);
-                
-                console.log("imageURL:", imageURL);
             }
 
             const updatedBranch = {
-                branch_name: updatedBranchData.branch_name !== '' ? updatedBranchData.branch_name : selectedBranch.branch_name,
-                branch_address: updatedBranchData.branch_address !== '' ? updatedBranchData.branch_address : selectedBranch.branch_address,
-                branch_contact: updatedBranchData.branch_contact !== '' ? updatedBranchData.branch_contact : selectedBranch.branch_contact,
-                branch_image: imageURL !== '' ? imageURL : selectedBranch.branch_image,
+                branch_name: updatedBranchData.branch_name || selectedBranch.branch_name,
+                branch_address: updatedBranchData.branch_address || selectedBranch.branch_address,
+                branch_contact: updatedBranchData.branch_contact || selectedBranch.branch_contact,
+                branch_image: imageURL || selectedBranch.branch_image,
                 branch_id: selectedBranch.branch_id
             };
-
-            console.log("selected Image:", selectedBranch.branch_image);
     
             await BranchService.updateBranch(updatedBranch);
             alert('Branch Updated');
             setSelectedBranch(null);
-            fetchBranches(); 
-            handleCloseModal(); 
+            fetchBranches();
+            handleCloseModal();
         } catch (error) {
             console.error('Error updating branch:', error);
         }
     };
 
     const handleDelete = async (branch_id) => {
-        try {
-            await BranchService.deleteBranch(branch_id);
-            console.log('Deleting branch with id:', branch_id);
-            alert('Branch and releted items have been flag as deleted.')
-            fetchBranches(); 
-        } catch (error) {
-            console.error('Error deleting branch:', error);
+        // Show a confirmation dialog
+        const confirmDelete = window.confirm(
+            "Are you sure you want to delete this branch? Deleting this branch will also flag connected items and admins as deleted."
+        );
+
+        if (confirmDelete) {
+            try {
+                await BranchService.deleteBranch(branch_id);
+                alert('Branch and related items have been flagged as deleted.');
+                fetchBranches();
+            } catch (error) {
+                console.error('Error deleting branch:', error);
+            }
         }
     };
-    
+
+
     const handleSubmit = async (e) => {
         e.preventDefault();
-        try {  
+
+        // Validate phone number or landline number format
+        if (!PHONE_NUMBER_REGEX.test(branchData.branch_contact) && !LANDLINE_NUMBER_REGEX.test(branchData.branch_contact)) {
+            alert('Please enter a valid phone number or landline number in the format: 09173245675 or (02) 1234 5678');
+            return;
+        }
+
+        try {
             let imageURL = branchData.branch_image;
 
             if (branch_image) {
@@ -118,35 +139,69 @@ function Branches() {
                 ...branchData,
                 branch_image: imageURL,
             };
-    
+
             if (isUpdateMode) {
                 await handleUpdate(newBranchData);
             } else {
                 await BranchService.createBranch(newBranchData);
                 alert('Branch Added');
-                fetchBranches(); 
-                handleCloseModal(); 
+                fetchBranches();
+                handleCloseModal();
             }
         } catch (error) {
             console.error('Error creating or updating branch:', error);
         }
     };
-    
+
     const handleTextChange = (e) => {
         const { name, value } = e.target;
         setBranchData({ ...branchData, [name]: value });
-
     };
 
     const handleImageChange = (e) => {
         setBranchImage(e.target.files[0]); // Update the state with the selected file
     };
 
-  return (
-    <Layout>
-        <div className="container-fluid vh-100 d-flex align-items-center justify-content-center">
+    // Filter handlers
+    const handleFilterChange = (e) => {
+        const { name, value } = e.target;
+        setFilters(prevFilters => ({
+            ...prevFilters,
+            [name]: name === 'isDeleted' ? e.target.checked : value
+        }));
+    };
+
+    return (
+        <Layout>
+            <div className="container-fluid vh-100 d-flex align-items-center justify-content-center">
                 <div className="col-md-10">
-                    <h2 className="text-left mb-4">Branch List</h2>
+                    <Form.Group controlId="filters" className="bg-danger p-3 text-light rounded">
+                        <Form.Label><h2>Branch List</h2></Form.Label>
+                        <hr className="mt-0" />
+                        <Row className="align-items-center">
+                            <Col md={3}>
+                                <Form.Label>Search Branch:</Form.Label>
+                                <Form.Control
+                                    type="text"
+                                    autoComplete='off'
+                                    name="branch_name"
+                                    value={filters.branch_name}
+                                    onChange={handleFilterChange}
+                                    placeholder="Search by branch name"
+                                />
+                            </Col>
+                            <Col md={3}>
+                                <Form.Label>Show Deleted:</Form.Label>
+                                <Form.Check 
+                                    type="checkbox" 
+                                    name="isDeleted" 
+                                    checked={filters.isDeleted} 
+                                    onChange={handleFilterChange}
+                                />
+                            </Col>
+                        </Row>
+                    </Form.Group>
+
                     <div style={{ maxHeight: '500px', overflowY: 'auto' }}>
                         <Table striped bordered hover>
                             <thead>
@@ -192,44 +247,59 @@ function Branches() {
                         </Button>
                     </div>
 
-                <Modal show={showModal} onHide={handleCloseModal} centered>
+                    <Modal show={showModal} onHide={handleCloseModal} centered>
                         <Modal.Header closeButton>
-                            <Modal.Title>{isUpdateMode ? 'Update Branch' : 'Add New Branch'}</Modal.Title>
+                            <Modal.Title>{isUpdateMode ? 'Update Branch' : 'Add Branch'}</Modal.Title>
                         </Modal.Header>
                         <Modal.Body>
                             <Form onSubmit={handleSubmit}>
-                                <Form.Group controlId="branchName">
-                                    <Form.Label>Name</Form.Label>
-                                    <Form.Control type="text" name="branch_name" value={branchData.branch_name} onChange={handleTextChange} required={!isUpdateMode} autoComplete="off"/>
+                                <Form.Group>
+                                    <Form.Label>Branch Name</Form.Label>
+                                    <Form.Control
+                                        type="text"
+                                        name="branch_name"
+                                        value={branchData.branch_name}
+                                        onChange={handleTextChange}
+                                        required
+                                    />
                                 </Form.Group>
-                                <Form.Group controlId="address">
-                                    <Form.Label>Address</Form.Label>
-                                    <Form.Control type="text" name="branch_address" value={branchData.branch_address} onChange={handleTextChange} required={!isUpdateMode} autoComplete="off"/>
+                                <Form.Group>
+                                    <Form.Label>Branch Address</Form.Label>
+                                    <Form.Control
+                                        type="text"
+                                        name="branch_address"
+                                        value={branchData.branch_address}
+                                        onChange={handleTextChange}
+                                        required
+                                    />
                                 </Form.Group>
-                                <Form.Group controlId="contact">
-                                    <Form.Label>Contact</Form.Label>
-                                    <Form.Control type="text" name="branch_contact" value={branchData.branch_contact} onChange={handleTextChange} required={!isUpdateMode} autoComplete="off"/>
+                                <Form.Group>
+                                    <Form.Label>Branch Contact Number</Form.Label>
+                                    <Form.Control
+                                        type="text"
+                                        name="branch_contact"
+                                        value={branchData.branch_contact}
+                                        onChange={handleTextChange}
+                                        required
+                                    />
                                 </Form.Group>
-                                <Form.Group controlId="branch_image">
-                                    <Form.Label>Photo</Form.Label>
-                                    <Form.Control 
-                                        type="file" 
-                                        name="branch_image" 
-                                        onChange={handleImageChange} 
-                                        // required={!isUpdateMode} 
-                                        accept="image/*"
+                                <Form.Group>
+                                    <Form.Label>Branch Image</Form.Label>
+                                    <Form.Control
+                                        type="file"
+                                        onChange={handleImageChange}
                                     />
                                 </Form.Group>
                                 <Button variant="primary" type="submit" className="mt-2">
-                                    {isUpdateMode ? 'Update Branch' : 'Add Branch'}
+                                    {isUpdateMode ? 'Update' : 'Add'}
                                 </Button>
                             </Form>
                         </Modal.Body>
                     </Modal>
                 </div>
-        </div>
-    </Layout>
-  )
+            </div>
+        </Layout>
+    );
 }
 
-export default Branches
+export default Branches;
