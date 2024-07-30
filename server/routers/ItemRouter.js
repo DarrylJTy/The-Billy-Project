@@ -71,80 +71,6 @@ ItemRouter.post("/create", async (req, res) => {
     }
 });
 
-
-ItemRouter.post("/getItemsWithFilters", (req, res) => {
-    const { branch_id, category, size_id, isDeleted } = req.body;
-
-    // SQL query to fetch items along with their sizes, quantities, and prices
-    let selectQuery = `
-        SELECT 
-            Item.*,
-            GROUP_CONCAT(DISTINCT Size.size_dimension ORDER BY Size.size_dimension ASC) AS sizes,
-            GROUP_CONCAT(DISTINCT Item_Data.size_id ORDER BY Item_Data.size_id ASC) AS size_ids,
-            GROUP_CONCAT(DISTINCT Item_Data.quantity ORDER BY Item_Data.size_id ASC) AS quantities,
-            GROUP_CONCAT(DISTINCT Item_Data.price ORDER BY Item_Data.size_id ASC) AS prices
-        FROM Item
-        LEFT JOIN Item_Data ON Item.item_id = Item_Data.item_id
-        LEFT JOIN Size ON Item_Data.size_id = Size.size_id
-        WHERE 1=1
-    `;
-
-    const params = [];
-    
-    if (branch_id) {
-        selectQuery += ' AND Item.branch_id = ?';
-        params.push(branch_id);
-    }
-
-    if (category) {
-        selectQuery += ' AND Item.category = ?';
-        params.push(category);
-    }
-
-    if (size_id) {
-        selectQuery += ' AND Item_Data.size_id = ?';
-        params.push(size_id);
-    }
-
-    if (isDeleted !== undefined) {
-        selectQuery += ' AND Item.isDeleted = ?';
-        params.push(isDeleted);
-    }
-
-    selectQuery += ' GROUP BY Item.item_id';
-
-    db.query(selectQuery, params, (err, result) => {
-        if (err) {
-            console.error(err);
-            return res.status(500).json({ error: "Failed to retrieve items" });
-        }
-
-        // Process the result to map the concatenated fields into arrays
-        const processedResult = result.map(item => {
-            const sizes = item.sizes ? item.sizes.split(',') : [];
-            const size_ids = item.size_ids ? item.size_ids.split(',') : [];
-            const quantities = item.quantities ? item.quantities.split(',') : [];
-            const prices = item.prices ? item.prices.split(',') : [];
-
-            // Combine size_ids, quantities, and prices into an array of objects
-            const sizeDetails = size_ids.map((size_id, index) => ({
-                size_id,
-                size_dimension: sizes[index],
-                quantity: quantities[index],
-                price: prices[index]
-            }));
-
-            return {
-                ...item,
-                sizes: sizeDetails
-            };
-        });
-
-        return res.status(200).json(processedResult);
-    });
-});
-
-
 // Get all items with sizes
 ItemRouter.get("/", (req, res) => {
     const selectQuery =
@@ -173,12 +99,11 @@ ItemRouter.get("/getAllWithDeleted", (req, res) => {
     });
 });
 
-// Get items from a specific branch
-ItemRouter.post("/getFromBranch", (req, res) => {
-    const { branch_id } = req.body;
+ItemRouter.post("/getItemsWithFilters", (req, res) => {
+    const { item_name, branch_id, category, size_id, isDeleted } = req.body;
 
-    // SQL query to fetch items with detailed size information
-    const selectQuery = `
+    // Base SQL query to fetch items along with their sizes, quantities, and prices
+    let selectQuery = `
         SELECT 
             Item.item_id,
             Item.item_name,
@@ -194,11 +119,40 @@ ItemRouter.post("/getFromBranch", (req, res) => {
         FROM Item
         LEFT JOIN Item_Data ON Item.item_id = Item_Data.item_id
         LEFT JOIN Size ON Item_Data.size_id = Size.size_id
-        WHERE Item.branch_id = ? AND Item.isDeleted = 0
-        ORDER BY Item.item_id, Size.size_id
+        WHERE 1=1
     `;
 
-    db.query(selectQuery, [branch_id], (err, result) => {
+    const params = [];
+
+    if (item_name) {
+        selectQuery += ' AND Item.item_name LIKE ?';
+        params.push(`%${item_name}%`);
+    }
+
+    if (branch_id) {
+        selectQuery += ' AND Item.branch_id = ?';
+        params.push(branch_id);
+    }
+
+    if (category) {
+        selectQuery += ' AND Item.category = ?';
+        params.push(category);
+    }
+
+    if (size_id) {
+        selectQuery += ' AND Item_Data.size_id = ?';
+        params.push(size_id);
+    }
+
+    if (isDeleted !== undefined) {
+        selectQuery += ' AND Item.isDeleted = ?';
+        params.push(isDeleted);
+    }
+
+    // Order by item_id and size_id
+    selectQuery += ' ORDER BY Item.item_id, Size.size_id';
+
+    db.query(selectQuery, params, (err, result) => {
         if (err) {
             console.error(err);
             return res.status(500).json({ error: "Failed to retrieve items" });
@@ -214,6 +168,8 @@ ItemRouter.post("/getFromBranch", (req, res) => {
                     description: row.description,
                     category: row.category,
                     item_image: row.item_image,
+                    branch_id: row.branch_id,
+                    isDeleted: row.isDeleted,
                     sizes: []
                 };
             }
@@ -233,11 +189,10 @@ ItemRouter.post("/getFromBranch", (req, res) => {
 
         // Convert the accumulator object to an array
         const formattedResult = Object.values(items);
-
-
         return res.status(200).json(formattedResult);
     });
 });
+
 
 
 const getInitialSizes = async (item_id) => {

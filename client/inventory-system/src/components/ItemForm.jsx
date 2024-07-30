@@ -79,15 +79,28 @@ const ItemForm = ({ showModal, handleCloseModal, isUpdateMode, selectedItem, fet
     };
 
     const handleSizeDetailChange = (size_id, e) => {
-        const { name, value } = e.target;
-        setSizeDetails(prev => ({
-            ...prev,
-            [size_id]: {
-                ...prev[size_id],
-                [name]: value
-            }
-        }));
+    const { name, value } = e.target;
+
+    // Convert value to a number
+    const numericValue = parseFloat(value);
+
+    // Define minimum values
+    const minValues = {
+        quantity: 0,
+        price: 0.00
     };
+
+    // Apply minimum value restrictions
+    const validatedValue = numericValue < minValues[name] ? minValues[name] : numericValue;
+
+    setSizeDetails(prev => ({
+        ...prev,
+        [size_id]: {
+            ...prev[size_id],
+            [name]: validatedValue
+        }
+    }));
+};
 
     const handleImageChange = (e) => {
         setItemImage(e.target.files[0]);
@@ -206,6 +219,7 @@ const ItemForm = ({ showModal, handleCloseModal, isUpdateMode, selectedItem, fet
                                                     type="number"
                                                     placeholder="Quantity"
                                                     name="quantity"
+                                                    min="0"
                                                     value={sizeDetails[size.size_id]?.quantity || ''}
                                                     onChange={(e) => handleSizeDetailChange(size.size_id, e)}
                                                 />
@@ -214,6 +228,7 @@ const ItemForm = ({ showModal, handleCloseModal, isUpdateMode, selectedItem, fet
                                                     step="0.01"
                                                     placeholder="Price"
                                                     name="price"
+                                                    min="0"
                                                     value={sizeDetails[size.size_id]?.price || ''}
                                                     onChange={(e) => handleSizeDetailChange(size.size_id, e)}
                                                     className="ml-2"

@@ -8,14 +8,14 @@ import '../css/ViewItemsCSS.css';
 const ViewAll = () => {
     const [items, setItems] = useState([]);
     const [filters, setFilters] = useState({
+        item_name: '',
         branch_id: '',
         category: '',
         size_id: '',
         isDeleted: false,
-    })
+    });
     const [sizes, setSizes] = useState([]);
     const [branches, setBranches] = useState([]);
-    const [selectedBranch, setSelectedBranch] = useState('');
     const [withDeleted, setWithDeleted] = useState(false);
 
     useEffect(() => {
@@ -27,51 +27,51 @@ const ViewAll = () => {
     const fetchItems = async () => {
         try {
             const response = await ItemService.getAllItemsWithFilters(filters);
-            setItems(response.data);
+            // Ensure the response data is in the expected format
+            const formattedItems = response.data.map(item => ({
+                ...item,
+                sizes: item.sizes.map(sizeDetail => ({
+                    ...sizeDetail,
+                    price: parseFloat(sizeDetail.price),
+                }))
+            }));
+            setItems(formattedItems);
         } catch (error) {
-            console.error("Error fetching items:", error)
+            console.error("Error fetching items:", error);
         }
     };
 
     const handleFilterChange = (e) => {
         const { name, value } = e.target;
-        setFilters(
-            prevFilters => ({
-                ...prevFilters,
-                [name]: value
-            }));
+        setFilters(prevFilters => ({
+            ...prevFilters,
+            [name]: value
+        }));
+        console.log("filters:", filters.item_name)
     };
 
     const fetchBranches = async () => {
         try {
-            const response = await BranchService.getAllBranches();
+            const response = await BranchService.getAllBranches(0);
             setBranches(response.data);
         } catch (error) {
             console.error('Error fetching branches:', error);
         }
     };
 
-    const fetchSizes = async() => {
+    const fetchSizes = async () => {
         try {
             const response = await ItemService.getSizes();
-            setSizes(response.data)
+            setSizes(response.data);
         } catch (error) {
             console.error('Error fetching sizes:', error);
         }
-    }
+    };
 
     const getBranchName = (branch_id) => {
         const branch = branches.find(b => b.branch_id === branch_id);
         return branch ? branch.branch_name : 'Unknown Branch';
     };
-
-
-    const filteredItems = items.filter(item => {
-        if (selectedBranch && item.branch_id.toString() !== selectedBranch) {
-            return false;
-        }
-        return true;
-    });
 
     return (
         <Layout>
@@ -92,12 +92,23 @@ const ViewAll = () => {
                                 </Form.Control>
                             </Col>
                             <Col md={2}>
-                                <Form.Label>Category:</Form.Label>
-                                <Form.Control type="text" autoComplete='off' name="category" defaultValue="" value={filters.category} onChange={handleFilterChange} />
+                                <Form.Label>Search Item:</Form.Label>
+                                <Form.Control
+                                    type="text"
+                                    autoComplete='off'
+                                    name="item_name"
+                                    value={filters.item_name}
+                                    onChange={handleFilterChange}
+                                    placeholder="Search by item name"
+                                />
                             </Col>
-                            <Col md={1}>
+                            <Col md={2}>
+                                <Form.Label>Category:</Form.Label>
+                                <Form.Control type="text" autoComplete='off' name="category" value={filters.category} onChange={handleFilterChange} />
+                            </Col>
+                            <Col md={2}>
                                 <Form.Label>Size:</Form.Label>
-                                <Form.Control as="select" name="size_id" defaultValue="" onChange={handleFilterChange}>
+                                <Form.Control as="select" name="size_id" onChange={handleFilterChange}>
                                     <option value="">All Sizes</option>
                                     {sizes.map(size => (
                                         <option key={size.size_id} value={size.size_id.toString()}>
@@ -108,10 +119,15 @@ const ViewAll = () => {
                             </Col>
                             <Col md={2}>
                                 <Form.Label>Show Deleted:</Form.Label>
-                                <Form.Check type="checkbox" name="isDeleted" checked={filters.isDeleted} onChange={() => setFilters(prevFilters => ({
-                                    ...prevFilters,
-                                    isDeleted: !prevFilters.isDeleted
-                                }))}/>
+                                <Form.Check 
+                                    type="checkbox" 
+                                    name="isDeleted" 
+                                    checked={filters.isDeleted} 
+                                    onChange={() => setFilters(prevFilters => ({
+                                        ...prevFilters,
+                                        isDeleted: !prevFilters.isDeleted
+                                    }))}
+                                />
                             </Col>
                         </Row>
                     </Form.Group>
@@ -126,14 +142,12 @@ const ViewAll = () => {
                                     <th>Description</th>
                                     <th>Category</th>
                                     <th>Sizes</th>
-                                    <th>Quantity</th>
-                                    <th>Price</th>
                                     <th>Branch</th>
                                     {withDeleted && <th>Deleted</th>}
                                 </tr>
                             </thead>
                             <tbody>
-                                {items.map((item, index) => (
+                                {items.map((item) => (
                                     <tr key={item.item_id}>
                                         <td>{item.item_id}</td>
                                         <td>
@@ -141,6 +155,7 @@ const ViewAll = () => {
                                                 <img 
                                                     src={item.item_image} 
                                                     style={{ width: '100px', height: '100px', objectFit: 'cover' }} 
+                                                    alt={item.item_name}
                                                 />
                                             ) : (
                                                 <span>No image uploaded</span>
@@ -149,9 +164,13 @@ const ViewAll = () => {
                                         <td>{item.item_name}</td>
                                         <td>{item.description}</td>
                                         <td>{item.category}</td>
-                                        <td>{item.sizes ? item.sizes : 'N/A'}</td>
-                                        <td>{item.quantity}</td>
-                                        <td>Php {item.price.toFixed(2)}</td>
+                                        <td>
+                                            {item.sizes.map(size => (
+                                                <div key={size.size_id}>
+                                                    {size.size_dimension} - Qty: {size.quantity}, Price: Php {size.price.toFixed(2)}
+                                                </div>
+                                            ))}
+                                        </td>
                                         <td>{getBranchName(item.branch_id)}</td>
                                         {withDeleted && (
                                             <td>
