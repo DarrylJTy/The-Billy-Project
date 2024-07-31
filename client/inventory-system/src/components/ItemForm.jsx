@@ -181,6 +181,7 @@ const ItemForm = ({ showModal, handleCloseModal, isUpdateMode, selectedItem, fet
             category: '',
             item_image: '',
         });
+        imageURL = '';
         setSelectedSizes([]);
         setSizeDetails({});
         handleCloseModal();
