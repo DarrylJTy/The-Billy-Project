@@ -38,6 +38,7 @@ const ItemForm = ({ showModal, handleCloseModal, isUpdateMode, selectedItem, fet
                 category: selectedItem.category,
                 item_image: selectedItem.item_image,
             });
+            console.log("item_image:", itemData.item_image)
 
             // Initialize sizeDetails and selectedSizes based on selectedItem.sizes
             const sizeDetails = {};
@@ -153,7 +154,7 @@ const ItemForm = ({ showModal, handleCloseModal, isUpdateMode, selectedItem, fet
                     quantity: sizeDetails[size].quantity,
                     price: sizeDetails[size].price
                 }));
-
+            
             const updatedItem = {
                 ...itemData,
                 item_image: imageURL,
@@ -181,7 +182,7 @@ const ItemForm = ({ showModal, handleCloseModal, isUpdateMode, selectedItem, fet
             category: '',
             item_image: '',
         });
-        imageURL = '';
+        setItemImage(null);
         setSelectedSizes([]);
         setSizeDetails({});
         handleCloseModal();
