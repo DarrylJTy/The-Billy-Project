@@ -12,8 +12,7 @@ export default function CustomFooter() {
             <img src="../MrBilly_Logo.png" alt="Logo" /><br />
             <p>MR BILLY BUILD EASY COPYRIGHT 2020 | ALL RIGHTS RESERVED</p>
             <div className="social-icons">
-                <a href="https://www.facebook.com/mrbillybuildeasy" target="_blank" rel="noopener noreferrer">F</a>
-                <a href="https://www.gmail.com" target="_blank" rel="noopener noreferrer">M</a>
+                <a href="https://www.facebook.com/mrbillybuildeasy" target="_blank" rel="noopener noreferrer">Facebook</a>
             </div>
         </div>
         <div className="right text-end">
