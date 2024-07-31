@@ -1,30 +1,41 @@
 import React, { useState, useEffect } from 'react';
-import { Modal } from 'react-bootstrap';
+import { Container, ToggleButton, ButtonGroup, Row, Col, Form } from 'react-bootstrap';
 import Layout from "../components/Layout";
 import ItemSlot from "../components/ItemSlot";
 import ItemDescriptionModal from "../components/itemdescriptionmodal";
 import "../style/global.css";
 import "../style/catalog.css";
-import { Container, ToggleButton, ButtonGroup, Row, Col } from "react-bootstrap";
 import ItemService from "../services/ItemService";
 
 export default function Catalog() {
   const [items, setItems] = useState([]);
-  const [selectedCategory, setSelectedCategory] = useState("Tiles");
   const [showModal, setShowModal] = useState(false);
   const [selectedItem, setSelectedItem] = useState(null);
+  const [filters, setFilters] = useState({
+      item_name: '',
+      category: 'Tiles',
+      isDeleted: false,
+  });
 
   useEffect(() => {
     fetchItems();
-  }, []); 
-
+  }, [filters]);
+  
   const fetchItems = async () => {
     try {
-      const response = await ItemService.getAllItems();
+      const response = await ItemService.getAllItems(filters);
       setItems(response.data);
     } catch (error) {
       console.error("Error fetching items:", error);
     }
+  };
+
+  const handleFilterChange = (e) => {
+    const { name, value } = e.target;
+    setFilters(prevFilters => ({
+      ...prevFilters,
+      [name]: value
+    }));
   };
 
   const handleShowModal = (item) => {
@@ -36,25 +47,6 @@ export default function Catalog() {
     setShowModal(false);
     setSelectedItem(null);
   };
-
-  // Function to remove duplicate items based on name
-  const removeDuplicateItems = (items) => {
-    const seen = new Set();
-    return items.filter(item => {
-      const isDuplicate = seen.has(item.item_name);
-      seen.add(item.item_name);
-      return !isDuplicate;
-    });
-  };
-
-  const filteredItems = removeDuplicateItems(
-    items.filter(item => item.category === selectedCategory.toLowerCase())
-  );
-
-  const chunkedItems = [];
-  for (let i = 0; i < filteredItems.length; i += 5) {
-    chunkedItems.push(filteredItems.slice(i, i + 5));
-  }
 
   return (
     <Layout>
@@ -70,11 +62,12 @@ export default function Catalog() {
                   type="radio"
                   id="option1"
                   value="Tiles"
+                  name="category"
                   className={`category-button ${
-                    selectedCategory === "Tiles" ? "selected" : ""
+                    filters.category === "Tiles" ? "selected" : ""
                   }`}
-                  checked={selectedCategory === "Tiles"}
-                  onChange={() => setSelectedCategory("Tiles")}
+                  checked={filters.category === "Tiles"}
+                  onChange={handleFilterChange}
                 >
                   Tiles
                 </ToggleButton>
@@ -82,11 +75,12 @@ export default function Catalog() {
                   type="radio"
                   id="option2"
                   value="Bathroom"
+                  name="category"
                   className={`category-button ${
-                    selectedCategory === "Bathroom" ? "selected" : ""
+                    filters.category === "Bathroom" ? "selected" : ""
                   }`}
-                  checked={selectedCategory === "Bathroom"}
-                  onChange={() => setSelectedCategory("Bathroom")}
+                  checked={filters.category === "Bathroom"}
+                  onChange={handleFilterChange}
                 >
                   Bathroom
                 </ToggleButton>
@@ -94,11 +88,12 @@ export default function Catalog() {
                   type="radio"
                   id="option3"
                   value="Doors"
+                  name="category"
                   className={`category-button ${
-                    selectedCategory === "Doors" ? "selected" : ""
+                    filters.category === "Doors" ? "selected" : ""
                   }`}
-                  checked={selectedCategory === "Doors"}
-                  onChange={() => setSelectedCategory("Doors")}
+                  checked={filters.category === "Doors"}
+                  onChange={handleFilterChange}
                 >
                   Doors
                 </ToggleButton>
@@ -108,24 +103,19 @@ export default function Catalog() {
 
           <Col sm={10} className="product-container">
             <div className="product-title">
-              <h3>{selectedCategory}</h3>
+              <h3>{filters.category}</h3>
             </div>
-            <div className="product-grid">
-              {chunkedItems.map((itemChunk, index) => (
-                <Row key={index} className="mb-4">
-                  {itemChunk.map((item) => (
-                    <Col key={item.id} md={2} className="mb-2">
-                      <ItemSlot
-                        imageSrc={item.item_image}
-                        name={item.item_name}
-                        price={item.price}
-                        onClick={() => handleShowModal(item)}
-                      />
-                    </Col>
-                  ))}
-                </Row>
+
+            <Row className="g-3">
+              {items.map((item) => (
+                <Col key={item.item_id} md={2} sm={4} xs={6} className="mb-2">
+                  <ItemSlot
+                    item={item}
+                    onClick={() => handleShowModal(item)}
+                  />
+                </Col>
               ))}
-            </div>
+            </Row>
           </Col>
         </Row>
       </Container>

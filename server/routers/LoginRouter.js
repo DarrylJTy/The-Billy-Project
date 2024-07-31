@@ -55,7 +55,6 @@ LoginRouter.post('/login', (req, res) => {
     db.query(query, [req.body.username], (error, data) => {
         if (error) return res.status(500).json({ Error: "Server Error." })
         if (data.length > 0) {
-            console.log("rand")
             bcrypt.compare(req.body.password.toString(), data[0].password, (error, response) => {
                 if(error) return res.status(401).json({ error: "Invalid username or password" });
             if(response) {

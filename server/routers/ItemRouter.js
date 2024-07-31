@@ -87,7 +87,7 @@ ItemRouter.post("/getItemsWithFilters", (req, res) => {
         LEFT JOIN Item_Data ON Item.item_id = Item_Data.item_id
         LEFT JOIN Size ON Item_Data.size_id = Size.size_id
         WHERE 1=1
-    `;
+    `; 
 
     const params = [];
 

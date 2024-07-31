@@ -57,8 +57,6 @@ AdminRouter.post("/getAdmins", (req, res) => {
 
     selectQuery += ' ORDER BY admin_id';
 
-    console.log(selectQuery, params)
-
     db.query(selectQuery, params, (err, result) => {
         if (err) {
             console.error(err);
