@@ -1,6 +1,7 @@
 .filter-container {
     border-right: 1px solid #999696;
     padding-top: 25px;
+    min-height: 63vh; /* Ensure the layout takes at least the full viewport height */
 }
 
 .filter-text-column > h2{

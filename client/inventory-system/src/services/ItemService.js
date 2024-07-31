@@ -1,24 +1,14 @@
 import axios from 'axios';
 import server from './config';
 
-const API_URL = `${server.hostname}/items`; // backend API URLL
+const API_URL = `${server.hostname}/items`; // backend API URL
 
 const ItemService = {
-    // Get all items with their sizes
-    getAllItems: async () => {
-        return await axios.get(API_URL);
+
+    getAllItemsWithFilters: async (itemFilters) => {
+        return await axios.post(`${API_URL}/getItemsWithFilters`, itemFilters);
     },
-    
-    // Get all items including deleted ones
-    getAllWithDeleted: async () => {
-        return await axios.get(`${API_URL}/getAllWithDeleted`); // Fixed the typo in the URL
-    },
-    
-    // Get items from a specific branch
-    getFromBranch: async (branch_id) => {
-        return await axios.post(`${API_URL}/getFromBranch`, { branch_id });
-    },
-    
+
     // Create a new item
     createItem: async (itemData) => {
         return await axios.post(`${API_URL}/create`, itemData);
@@ -30,8 +20,8 @@ const ItemService = {
     },
     
     // Delete an item
-    deleteItem: async (item_id) => {
-        return await axios.post(`${API_URL}/delete`, { item_id });
+    deleteItem: async (item_id, item_name) => {
+        return await axios.post(`${API_URL}/delete`, { item_id, item_name });
     },
     
     // Get all sizes

@@ -1,9 +1,9 @@
+const PRODUCTION = process.env.GATSBY_PRODUCTION || false
 const SERVER_HOSTNAME = process.env.GATSBY_SERVER_URL || 'http://localhost'
-const SERVER_PORT = process.env.VITE_SERVER_PORT || '8001'
+const SERVER_PORT = process.env.GATSBY_SERVER_PORT || '8001'
 
 const SERVER = {
-    hostname: SERVER_HOSTNAME,
-    port: SERVER_PORT
+    hostname: PRODUCTION ? `${SERVER_HOSTNAME}` : `${SERVER_HOSTNAME}:${SERVER_PORT}`,
 }
 
 export default SERVER;

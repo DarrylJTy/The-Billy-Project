@@ -26,7 +26,7 @@ function Dashboard() {
         setBranchId(branchID);
         setIsMasterAdmin(isMasterAdmin);
       } catch (error) {
-        console.error('Error fetching branch ID:', error);
+        console.log('Error fetching branch ID');
       }
     };
 
@@ -35,7 +35,7 @@ function Dashboard() {
         const total = await ItemService.getTotalProducts(branch_id, isMasterAdmin);
         setTotalProducts(total.data.total_products);
       } catch (error) {
-        console.error('Error fetching total products:', error);
+        console.log('Error fetching total products');
       }
     };
 
@@ -44,16 +44,16 @@ function Dashboard() {
         const total = await ItemService.getTotalItemStocks(branch_id, isMasterAdmin);
         setTotalItemStocks(total.data.total_item_stocks);
       } catch (error) {
-        console.error('Error fetching total item stocks:', error);
+        console.log('Error fetching total item stocks');
       }
     };
 
     const fetchTotalItemOutOfStock = async () => {
       try {
         const total = await ItemService.getTotalOutOfStockInBranch(branch_id, isMasterAdmin);
-        setTotalItemsOutOfStock(total.data.total_out_of_stock_items);
+        setTotalItemsOutOfStock(total.data);
       } catch (error) {
-        console.error('Error fetching total items out of stock:', error);
+        console.log('Error fetching total items out of stock');
       }
     };
 
@@ -62,7 +62,7 @@ function Dashboard() {
         const total = await ItemService.getTotalInventoryCost(branch_id, isMasterAdmin);
         setTotalInventoryCost(total.data.total_inventory_cost);
       } catch (error) {
-        console.error('Error fetching total inventory cost:', error);
+        console.log('Error fetching total inventory cost');
       }
     };
 
@@ -84,32 +84,32 @@ function Dashboard() {
         };
         setPieChartData(chartData);
       } catch (error) {
-        console.error('Error fetching pie chart data:', error);
+        console.log('Error fetching pie chart dat');
       }
     };
 
     const fetchTopItems = async () => {
       try {
-        const response = await ItemService.getTopItems(branch_id, isMasterAdmin);
-        const items = response.data;
+          const response = await ItemService.getTopItems(branch_id, isMasterAdmin);
+          const items = response.data;
 
-        const labels = items.map(item => item.item_name);
-        const data = items.map(item => item.total_quantity);
+          const labels = items.map(item => `${item.item_name} (${item.size_dimension})`);
+          const data = items.map(item => item.total_quantity);
 
-        setBarChartData({
-          labels: labels,
-          datasets: [
-            {
-              label: 'Top 10 Items by Quantity',
-              backgroundColor: 'rgb(255, 192, 192)',
-              borderColor: 'rgb(0)',
-              borderWidth: 1,
-              data: data,
-            },
-          ],
-        });
+          setBarChartData({
+            labels: labels,
+            datasets: [
+              {
+                label: 'Top 10 Items by Quantity',
+                backgroundColor: 'rgb(255, 192, 192)',
+                borderColor: 'rgb(0)',
+                borderWidth: 1,
+                data: data,
+              },
+            ],
+          });
       } catch (error) {
-        console.error('Error fetching top items:', error);
+        console.log('Error fetching top items:', error);
       }
     };
 
@@ -125,6 +125,14 @@ function Dashboard() {
     }
   }, [branch_id]);
 
+  const spinnerComponent = () => {
+      return (
+          <div className="d-flex justify-content-center align-items-center" style={{ height: '100px' }}>
+                <Spinner animation="border" />
+          </div>
+      )
+  }
+  
   return (
     <Layout>
       <div className="p-3 bg-light">
@@ -135,7 +143,11 @@ function Dashboard() {
                 <BoxFill className="fs-1 text-danger" />
                 <div>
                   <span>Products</span>
-                  <h2>{totalProducts?.toLocaleString()}</h2>
+                  {totalProducts ? (
+                      <h2>{totalProducts?.toLocaleString()}</h2>
+                  ) : (
+                      spinnerComponent()
+                  )}
                 </div>
               </div>
             </div>
@@ -145,7 +157,11 @@ function Dashboard() {
                 <Boxes className="fs-1 text-primary" />
                 <div>
                   <span>Total Item Stocks</span>
-                  <h2>{totalItemStocks?.toLocaleString()}</h2>
+                  {totalItemStocks ? (
+                      <h2>{totalItemStocks?.toLocaleString()}</h2>
+                  ) : (
+                      spinnerComponent()
+                  )}
                 </div>
               </div>
             </div>
@@ -155,7 +171,11 @@ function Dashboard() {
                 <XSquare className="fs-1 text-danger" />
                 <div>
                   <span>Items Out of Stock</span>
-                  <h2>{totalItemsOutOfStock?.toLocaleString()}</h2>
+                  {totalItemsOutOfStock ? (
+                      <h2>{totalItemsOutOfStock?.toLocaleString()}</h2>
+                  ) : (
+                      spinnerComponent()
+                  )}
                 </div>
               </div>
             </div>
@@ -165,7 +185,12 @@ function Dashboard() {
                 <CurrencyDollar className="fs-1 text-success" />
                 <div>
                   <span>Total Inventory Cost</span>
-                  <h2>{totalInventoryCost?.toLocaleString()}</h2>
+                  {totalInventoryCost ? (
+                      <h2>{totalInventoryCost?.toLocaleString()}</h2>
+                  ) : (
+                      spinnerComponent()
+                  )}
+                  
                 </div>
               </div>
             </div>
@@ -185,9 +210,7 @@ function Dashboard() {
               {pieChartData ? (
                 <PieChart chartData={pieChartData} />
               ) : (
-                <div className="d-flex justify-content-center align-items-center" style={{ height: '100px' }}>
-                  <Spinner animation="border" />
-                </div>
+                spinnerComponent()
               )}
             </div>
           </div>
