@@ -38,7 +38,7 @@ function Branches() {
             const response = await BranchService.getAllBranches(filters);
             setBranches(response.data);
         } catch (error) {
-            console.error('Error fetching branches:', error);
+            console.log('Error fetching branches');
         }
     };
 
@@ -96,14 +96,13 @@ function Branches() {
             fetchBranches();
             handleCloseModal();
         } catch (error) {
-            console.error('Error updating branch:', error);
+            console.log('Error updating branch');
         }
     };
 
     const handleDelete = async (branch_id) => {
-        // Show a confirmation dialog
         const confirmDelete = window.confirm(
-            "Are you sure you want to delete this branch? Deleting this branch will also flag connected items and admins as deleted."
+            "Are you sure you want to delete this branch? Deleting this branch will also flag items and admins under this branch as deleted."
         );
 
         if (confirmDelete) {
@@ -112,11 +111,10 @@ function Branches() {
                 alert('Branch and related items have been flagged as deleted.');
                 fetchBranches();
             } catch (error) {
-                console.error('Error deleting branch:', error);
+                console.log('Error deleting branch');
             }
         }
     };
-
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -149,7 +147,7 @@ function Branches() {
                 handleCloseModal();
             }
         } catch (error) {
-            console.error('Error creating or updating branch:', error);
+            console.log('Error creating or updating branch');
         }
     };
 
@@ -211,7 +209,9 @@ function Branches() {
                                     <th>Image</th>
                                     <th>Address</th>
                                     <th>Contact Number</th>
-                                    <th className="text-center">Actions</th>
+                                    {!filters.isDeleted &&
+                                        <th className="text-center">Actions</th>
+                                    }
                                 </tr>
                             </thead>
                             <tbody>
@@ -231,10 +231,12 @@ function Branches() {
                                         </td>
                                         <td>{branch.branch_address}</td>
                                         <td>{branch.branch_contact}</td>
-                                        <td className='d-flex align-items-center justify-content-center'>
-                                            <Button variant="warning" onClick={() => handleShowModal(branch)} className="m-1">Update</Button>
-                                            <Button variant="danger" onClick={() => handleDelete(branch.branch_id)}>Delete</Button>
-                                        </td>
+                                        {!filters.isDeleted &&
+                                            <td className='d-flex align-items-center justify-content-center'>
+                                                <Button variant="warning" onClick={() => handleShowModal(branch)} className="m-1">Update</Button>
+                                                <Button variant="danger" onClick={() => handleDelete(branch.branch_id)}>Delete</Button>
+                                            </td>
+                                        }
                                     </tr>
                                 ))}
                             </tbody>
@@ -260,6 +262,7 @@ function Branches() {
                                         name="branch_name"
                                         value={branchData.branch_name}
                                         onChange={handleTextChange}
+                                        autoComplete='off'
                                         required
                                     />
                                 </Form.Group>
@@ -270,6 +273,7 @@ function Branches() {
                                         name="branch_address"
                                         value={branchData.branch_address}
                                         onChange={handleTextChange}
+                                        autoComplete='off'
                                         required
                                     />
                                 </Form.Group>
@@ -280,6 +284,7 @@ function Branches() {
                                         name="branch_contact"
                                         value={branchData.branch_contact}
                                         onChange={handleTextChange}
+                                        autoComplete='off'
                                         required
                                     />
                                 </Form.Group>

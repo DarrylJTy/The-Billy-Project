@@ -4,28 +4,13 @@ import server from './config';
 const API_URL = `${server.hostname}/items`; // backend API URLL
 
 const ItemService = {
-    // Get all items with their sizes
-    getAllItems: async () => {
-        return await axios.get(API_URL);
-    },
 
     getAllItemsWithFilters: async (itemFilters) => {
         return await axios.post(`${API_URL}/getItemsWithFilters`, itemFilters);
     },
-    
-    // Get all items including deleted ones
-    getAllWithDeleted: async () => {
-        return await axios.get(`${API_URL}/getAllWithDeleted`);
-    },
-    
-    // Get items from a specific branch
-    getFromBranch: async (branch_id) => {
-        return await axios.post(`${API_URL}/getFromBranch`, { branch_id });
-    },
-    
+
     // Create a new item
     createItem: async (itemData) => {
-        console.log(itemData)
         return await axios.post(`${API_URL}/create`, itemData);
     },
     

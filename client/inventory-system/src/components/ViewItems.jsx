@@ -34,7 +34,7 @@ const ViewItems = () => {
                     branch_id: branchID
                 }));
             } catch (error) {
-                console.error('Error fetching branch ID:', error);
+                console.log('Error fetching branch ID');
             }
         };
 
@@ -43,7 +43,7 @@ const ViewItems = () => {
                 const response = await ItemService.getSizes();
                 setSizes(response.data);
             } catch (error) {
-                console.error('Error fetching sizes:', error);
+                console.log('Error fetching sizes');
             }
         };
 
@@ -71,7 +71,7 @@ const ViewItems = () => {
             }));
             setItems(formattedItems);
         } catch (error) {
-            console.error("Error fetching items:", error);
+            console.error("Error fetching items");
         } finally {
             setLoading(false); // Set loading to false once items are fetched
         }
@@ -90,13 +90,19 @@ const ViewItems = () => {
     }
 
     const handleDelete = async (item_id, item_name) => {
-        try {
-            await ItemService.deleteItem(item_id, item_name);
-            alert("Successfully Deleted Item.");
-            fetchItems();
-        } catch (error) {
-            console.error('Error deleting item:', error);
+        const confirmDelete = window.confirm(
+            "Are you sure you want to delete this item?"
+        )
+        if (confirmDelete) {
+            try {
+                await ItemService.deleteItem(item_id, item_name);
+                alert("Successfully Deleted Item.");
+                fetchItems();
+            } catch (error) {
+                console.log('Error deleting item');
+            }
         }
+        
     };
 
     const handleShowModal = (item) => {
@@ -138,13 +144,15 @@ const ViewItems = () => {
                             <Col md={2}>
                                 <Form.Label>Category:</Form.Label>
                                 <Form.Control
-                                    type="text"
-                                    autoComplete='off'
+                                    as="select"
                                     name="category"
-                                    value={filters.category}
                                     onChange={handleFilterChange}
-                                    placeholder="Search by category"
-                                />
+                                >
+                                    <option value="">All Categories</option>
+                                    <option value="tiles">Tiles</option>
+                                    <option value="bathroom">Bathroom</option>
+                                    <option value="doors">Doors</option>
+                               </Form.Control>
                             </Col>
                             <Col md={2}>
                                 <Form.Label>Size:</Form.Label>
@@ -252,7 +260,7 @@ const ViewItems = () => {
                                         );
                                     })}
                                 </tbody>
-                            </Table>
+                                </Table>
                         </div>
                     )}
 

@@ -38,7 +38,7 @@ const ViewAll = () => {
             }));
             setItems(formattedItems);
         } catch (error) {
-            console.error("Error fetching items:", error);
+            console.log("Error fetching items");
         }
     };
 
@@ -52,10 +52,10 @@ const ViewAll = () => {
 
     const fetchBranches = async () => {
         try {
-            const response = await BranchService.getAllBranches(0);
+            const response = await BranchService.getAllBranches();
             setBranches(response.data);
         } catch (error) {
-            console.error('Error fetching branches:', error);
+            console.log('Error fetching branches');
         }
     };
 
@@ -64,7 +64,7 @@ const ViewAll = () => {
             const response = await ItemService.getSizes();
             setSizes(response.data);
         } catch (error) {
-            console.error('Error fetching sizes:', error);
+            console.log('Error fetching sizes');
         }
     };
 
@@ -86,6 +86,21 @@ const ViewAll = () => {
                         <hr className="mt-0" />
                         <Row className="align-items-center">
                             <Col md={2}>
+                                <Form.Label>Filter by Branch:</Form.Label>
+                                <Form.Control
+                                    as="select"
+                                    name="branch_id"
+                                    onChange={handleFilterChange}
+                                >
+                                    <option value="">All Branches</option>
+                                    {branches.filter(branch => filters.isDeleted || !branch.isDeleted).map(branch => (
+                                        <option key={branch.branch_id} value={branch.branch_id}>
+                                            {branch.branch_name}
+                                        </option>
+                                    ))}
+                                </Form.Control>
+                            </Col>
+                            <Col md={2}>
                                 <Form.Label>Search Item:</Form.Label>
                                 <Form.Control
                                     type="text"
@@ -99,19 +114,21 @@ const ViewAll = () => {
                             <Col md={2}>
                                 <Form.Label>Category:</Form.Label>
                                 <Form.Control
-                                    type="text"
-                                    autoComplete='off'
+                                    as="select"
                                     name="category"
-                                    value={filters.category}
                                     onChange={handleFilterChange}
-                                    placeholder="Search by category"
-                                />
+                                >
+                                    <option value="">All Categories</option>
+                                    <option value="tiles">Tiles</option>
+                                    <option value="bathroom">Bathroom</option>
+                                    <option value="doors">Doors</option>
+                               </Form.Control>
                             </Col>
-                            <Col md={2}>
+                            <Col md={1}>
                                 <Form.Label>Size:</Form.Label>
                                 <Form.Control as="select" name="size_id" onChange={handleFilterChange}>
                                     <option value="">All Sizes</option>
-                                    {sizes.map(size => (
+                                    {sizes.filter(size => size.size_id !== 0).map(size => (
                                         <option key={size.size_id} value={size.size_id.toString()}>
                                             {size.size_dimension}
                                         </option>
@@ -197,20 +214,14 @@ const ViewAll = () => {
                                             <td>{item.updated_at}</td>
                                         }
                                         <td>{getBranchName(item.branch_id)}</td>
-                                        {withDeleted && (
-                                            <td>
-                                                <Form.Check 
-                                                    type="checkbox" 
-                                                    checked={item.isDeleted} 
-                                                    readOnly 
-                                                />
-                                            </td>
-                                        )}
                                     </tr>
                                 ))}
                             </tbody>
                         </Table>
                     </div>
+                    {filters.isDeleted &&
+                        <div className="text-muted mt-1 mb-2">If the deleted name consists a <strong>"B_ID"</strong> in the name, it means it was deleted from a branch deletion otherwise it was deleted normally. This is to ensure unique naming in the database.</div>
+                    }
                 </div>
             </div>
         </Layout>

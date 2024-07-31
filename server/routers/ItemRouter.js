@@ -64,8 +64,10 @@ ItemRouter.post("/create", async (req, res) => {
 
         res.status(201).json({ message: "Item created successfully" });
     } catch (error) {
-        console.error(error);
-        res.status(500).json({ error: "Failed to create item" });
+        if (error.code === 'ER_DUP_ENTRY') {
+            return res.status(409).json({ error: 'Duplicate entry detected' });
+        }
+        res.status(500).json({ error: 'Failed to update item' });
     }
 });
 
@@ -147,7 +149,6 @@ ItemRouter.post("/getItemsWithFilters", (req, res) => {
 
             // Push size details if available
             if (row.size_id || row.size_id == 0) {
-                console.log("ran", size_id)
                 acc[row.item_id].sizes.push({
                     size_id: row.size_id,
                     size_dimension: row.size_dimension,
@@ -162,38 +163,9 @@ ItemRouter.post("/getItemsWithFilters", (req, res) => {
         // Convert the accumulator object to an array
         const formattedResult = Object.values(items);
 
-        console.log(items)
-
         return res.status(200).json(formattedResult);
     });
 });
-
-const getInitialSizes = async (item_id) => {
-    return new Promise((resolve, reject) => {
-        db.query(`
-            SELECT GROUP_CONCAT(Size.size_dimension) AS sizes 
-            FROM Item 
-            LEFT JOIN Item_Size ON Item.item_id = Item_Size.item_id 
-            LEFT JOIN Size ON Item_Size.size_id = Size.size_id 
-            WHERE Item.item_id = ?`, 
-            [item_id], 
-            (err, results) => {
-                if (err) {
-                    console.error('Query Error:', err);
-                    return reject(err);
-                }
-        
-                // Access the sizes string
-                const initialSizesString = results[0].sizes;
-        
-                // Convert the string to an array if needed
-                const initialSizesArray = initialSizesString ? initialSizesString.split(',') : [];
-        
-                resolve(initialSizesArray);
-            }
-        );
-    });
-};
 
 ItemRouter.post('/update', async (req, res) => {
     const {
@@ -212,14 +184,19 @@ ItemRouter.post('/update', async (req, res) => {
             UPDATE Item 
             SET item_name = ?, description = ?, category = ?, item_image = ?, updated_at = ?
             WHERE item_id = ?`;
-        await db.query(updateItemQuery, [
-            item_name,
-            description,
-            category,
-            item_image,
-            updated_at,
-            item_id
-        ]);
+        await new Promise((resolve, reject) => {
+            db.query(updateItemQuery, [
+                item_name,
+                description,
+                category,
+                item_image,
+                updated_at,
+                item_id
+            ], (error) => {
+                if (error) return reject(error);
+                resolve();
+            });
+        });    
 
         // Get initial sizes from the database
         const getInitialSizesQuery = `
@@ -270,8 +247,6 @@ ItemRouter.post('/update', async (req, res) => {
                 DELETE FROM Item_Data 
                 WHERE item_id = ? AND size_id IN (${sizesToDelete.map(() => '?').join(',')})`;
             
-            console.log('Delete parameters:', [item_id, ...sizesToDelete]);
-            
             await new Promise((resolve, reject) => {
                 db.query(deleteSizesQuery, [item_id, ...sizesToDelete], (err) => {
                     if (err) {
@@ -320,7 +295,9 @@ ItemRouter.post('/update', async (req, res) => {
 
         res.status(200).json({ message: 'Item updated successfully' });
     } catch (error) {
-        console.error('Error updating item:', error);
+        if (error.code === 'ER_DUP_ENTRY') {
+            return res.status(409).json({ error: 'Duplicate entry detected' });
+        }
         res.status(500).json({ error: 'Failed to update item' });
     }
 });
@@ -330,14 +307,12 @@ ItemRouter.post("/delete", (req, res) => {
     const { item_id, item_name } = req.body;
     const updated_at = new Date();
 
-    // Ensure the item_name includes "(Deleted)"
-    const updatedItemName = item_name.includes("(Deleted)") 
-        ? item_name 
-        : `${item_name} (Deleted)`;
+    // Ensure the item_name includes "(Deleted)" and the id
+    const updatedItemName = `${item_name} (Deleted - ID: ${item_id})`;
 
     // Query to update the item
-    const updateQuery = "UPDATE Item SET item_name = ?, isDeleted = ? updated_at = ? WHERE item_id = ?";
-    db.query(updateQuery, [updatedItemName, true, item_id, updated_at], (err, result) => {
+    const updateQuery = "UPDATE Item SET item_name = ?, isDeleted = ?, updated_at = ? WHERE item_id = ?";
+    db.query(updateQuery, [updatedItemName, true, updated_at, item_id], (err, result) => {
         if (err) {
             console.error(err);
             return res.status(500).json({ error: "Failed to delete item" });

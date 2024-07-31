@@ -1,7 +1,5 @@
 import React, { useEffect, useState } from "react";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
-import Home from './pages/Home';
-import Register from './pages/Register';
 import Login from './pages/Login';
 import ViewItems from "./components/ViewItems";
 import ViewAll from "./components/ViewAll";
@@ -21,14 +19,12 @@ export default function App() {
       try {
           const adminData = await TokenService.getAdmin(); 
           const isMasterAdmin = await TokenService.getIsMasterAdmin();
-          console.log("admin Data (app.jsx):", adminData)
-          console.log("isMasterAdmin (app.jsx):", isMasterAdmin);
           if (adminData) {
               setAdmin(adminData);
               setIsMasterAdmin(isMasterAdmin);
           } 
       } catch(error) {
-          console.error("Failed to fetch admin data:", error);
+          console.log("Failed to fetch admin data");
       }
     }
     fetchAdminAndAdminStatus();
@@ -41,7 +37,6 @@ export default function App() {
         {!admin && (
           <>
             <Route path='/' element={<Navigate to="/login" />} />
-            <Route path='/register' element={<Register />} />
             <Route path='/login' element={<Login />} />
             <Route path="/404" element={<NotFound />} />
             <Route path="*" element={<Navigate to="/404" />} />
@@ -63,7 +58,6 @@ export default function App() {
               <Route path="/admins" element={<Navigate to="/viewitems" />} />
             </>
         ): (
-          
           <>
             <Route path="/viewallitems" element={<ViewAll />}/>
             <Route path="/viewitems" element={<Navigate to="/viewallitems" />}/>

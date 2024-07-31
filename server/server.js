@@ -41,6 +41,5 @@ app.use('/branches', BranchRouter)
 app.use('/admins', AdminRouter)
 
 app.listen(8001, () => {
-    console.log("ORIGINS:", ORIGINS)
-    console.log('Running in port 8001')
+    console.log("Server is running!")
 })

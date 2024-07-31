@@ -40,9 +40,6 @@ BranchRouter.post("/create", (req, res) => {
 BranchRouter.post("/getBranches", (req, res) => {
 	const { branch_name, isDeleted } = req.body
 
-	console.log(req.body)
-
-	// Base SQL query to fetch branches
     let selectQuery = `
         SELECT * 
         FROM Branch
@@ -61,7 +58,6 @@ BranchRouter.post("/getBranches", (req, res) => {
         params.push(isDeleted);
     }
 
-    // Order by branch_id for consistent results
     selectQuery += ' ORDER BY branch_id';
 
     // Execute the query
@@ -123,14 +119,13 @@ BranchRouter.post("/update", (req, res) => {
 	);
 });
 
-// Delete a Branch and rename related items and users to include (deleted)
 BranchRouter.post("/delete", (req, res) => {
     const branch_id = req.body.branch_id;
 
-    // Queries to update the name and isDeleted flag
-    const deleteBranchQuery = "UPDATE Branch SET branch_name = CONCAT(branch_name, ' (deleted)'), isDeleted = ? WHERE branch_id = ?";
-    const deleteItemsQuery = "UPDATE Item SET item_name = CONCAT(item_name, ' (deleted)'), isDeleted = ? WHERE branch_id = ?";
-    const deleteUsersQuery = "UPDATE Admin SET username = CONCAT(username, ' (deleted)'), isDeleted = ? WHERE branch_id = ?";
+    // Queries to update the name and isDeleted flag with IDs
+    const deleteBranchQuery = "UPDATE Branch SET branch_name = CONCAT(branch_name, ' (Deleted - B_ID:', ? ,')'), isDeleted = ? WHERE branch_id = ?";
+    const deleteItemsQuery = "UPDATE Item SET item_name = CONCAT(item_name, ' (Deleted - B_ID:', ? ,')'), isDeleted = ? WHERE branch_id = ? AND isDeleted = 0";
+    const deleteUsersQuery = "UPDATE Admin SET username = CONCAT(username, ' (Deleted - B_ID:', ? ,')'), isDeleted = ? WHERE branch_id = ? AND isDeleted = 0";
 
     // Start a transaction
     db.beginTransaction(err => {
@@ -140,7 +135,7 @@ BranchRouter.post("/delete", (req, res) => {
         }
 
         // Rename and flag the branch as deleted
-        db.query(deleteBranchQuery, [true, branch_id], (err, result) => {
+        db.query(deleteBranchQuery, [branch_id, true, branch_id], (err, result) => {
             if (err) {
                 return db.rollback(() => {
                     console.error(err);
@@ -149,7 +144,7 @@ BranchRouter.post("/delete", (req, res) => {
             }
 
             // Rename and flag the related items as deleted
-            db.query(deleteItemsQuery, [true, branch_id], (err, result) => {
+            db.query(deleteItemsQuery, [branch_id, true, branch_id], (err, result) => {
                 if (err) {
                     // Check if the error is due to a non-existing table
                     if (err.code === 'ER_NO_SUCH_TABLE') {
@@ -163,7 +158,7 @@ BranchRouter.post("/delete", (req, res) => {
                 }
 
                 // Rename and flag the related users as deleted
-                db.query(deleteUsersQuery, [true, branch_id], (err, result) => {
+                db.query(deleteUsersQuery, [branch_id, true, branch_id], (err, result) => {
                     if (err) {
                         // Check if the error is due to a non-existing table
                         if (err.code === 'ER_NO_SUCH_TABLE') {
@@ -192,5 +187,6 @@ BranchRouter.post("/delete", (req, res) => {
         });
     });
 });
+
 
 export { BranchRouter };

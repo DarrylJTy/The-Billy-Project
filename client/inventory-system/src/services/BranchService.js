@@ -8,7 +8,6 @@ const BranchService = {
         return await axios.post(`${API_URL}/create`, branchData)
     },
     getAllBranches: async (filters) => {
-        console.log("FILTERS:", filters)
         return await axios.post(`${API_URL}/getBranches`, filters);
     },
     getSpecificBranchName: async (branch_id) => {
@@ -18,7 +17,6 @@ const BranchService = {
         return await axios.post(`${API_URL}/update`, branchData);
     }},
     deleteBranch: async (branch_id) => {
-        console.log(branch_id)
         return await axios.post(`${API_URL}/delete`, {branch_id});
     }
 }

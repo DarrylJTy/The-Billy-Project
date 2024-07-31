@@ -53,10 +53,11 @@ LoginRouter.post('/register', (req, res) => {
 LoginRouter.post('/login', (req, res) => {
     const query = 'SELECT * FROM Admin WHERE username = ? AND isDeleted = 0';
     db.query(query, [req.body.username], (error, data) => {
-        if(error) return res.json({Error: "Login error in server."})
-        if(data.length > 0) {
+        if (error) return res.status(500).json({ Error: "Server Error." })
+        if (data.length > 0) {
+            console.log("rand")
             bcrypt.compare(req.body.password.toString(), data[0].password, (error, response) => {
-                if(error) return res.json({Error: "Password compare error."})
+                if(error) return res.status(401).json({ error: "Invalid username or password" });
             if(response) {
                 const admin = {
                     admin_id: data[0].admin_id,
@@ -68,7 +69,7 @@ LoginRouter.post('/login', (req, res) => {
                 const token = jwt.sign(admin, JWT_SECRET, {expiresIn: '2h'})
                 
                 const now = new Date();
-                const expireDate = new Date(now.getTime() + 24 * 60 * 60 * 1000); // 1 day
+                const expireDate = new Date(now.getTime() + 12 * 60 * 60 * 1000); // 12 hours
 
                 const cookieOptions = {
                     path: "/",
@@ -83,13 +84,13 @@ LoginRouter.post('/login', (req, res) => {
 
                 res.cookie('token', token, cookieOptions);
                 
-                return res.json({Status: "Success", admin});
+                return res.status(200).json({Status: "Login Successful"});
             } else {
                 return res.json({Error: "Incorrect Password."});
             }
             });
         } else {
-            return res.json({Error: "Username not found."})
+            return res.status(401).json({ error: "Invalid username or password" });
         }
     })
 })

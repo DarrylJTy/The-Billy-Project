@@ -17,21 +17,40 @@ function Login() {
 
 	const navigate = useNavigate();
     const handleSubmit = (event) => {
-        event.preventDefault();
-        axios.post(`${server.hostname}/login`, values)
+    event.preventDefault();
+
+    axios.post(`${server.hostname}/login`, values)
         .then(res => {
-			if (res.data.Status === "Success") {
-				axios.get(`${server.hostname}/dashboard`).then(res => {
-					console.log(res);
-				})
-				navigate("/dashboard");
-				location.reload(true);
-            } else {
-                alert("Error");
+            if (res.status === 200) {
+                // Navigate or reload page
+                navigate("/dashboard");
+                location.reload(true);
             }
         })
-        .catch(err => console.log(err));
-    }
+        .catch(err => {
+            // Handle errors
+            if (err.response) {
+                // Server responded with a status other than 2xx
+                switch (err.response.status) {
+                    case 500:
+                        alert("Server Error");
+                        break;
+                    case 401:
+                        alert("Invalid username or password");
+                        break;
+                    default:
+                        alert("An unexpected error occurred");
+                }
+            } else if (err.request) {
+                // No response was received from the server
+                alert("No response received from server");
+            } else {
+                // Error setting up the request
+                alert("Error setting up the request");
+            }
+        });
+};
+
 
 
 	return (
@@ -58,6 +77,7 @@ function Login() {
 									value={values.username}
 									onChange={e => setValues({ ...values, username: e.target.value })}
 									autoComplete="off"
+									required
 								/>
 							</Form.Group>
 
@@ -70,6 +90,7 @@ function Login() {
 										value={values.password}
 										onChange={e => setValues({ ...values, password: e.target.value })}
 										autoComplete="off"
+										required
 									/>
 									<Button
 										variant="outline-danger"

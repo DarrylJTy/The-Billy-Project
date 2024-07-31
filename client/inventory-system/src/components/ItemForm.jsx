@@ -23,7 +23,7 @@ const ItemForm = ({ showModal, handleCloseModal, isUpdateMode, selectedItem, fet
                 const response = await ItemService.getSizes();
                 setSizes(response.data);
             } catch (error) {
-                console.error('Error fetching sizes:', error);
+                console.error('Error fetching sizes:');
             }
         };
 
@@ -144,8 +144,6 @@ const ItemForm = ({ showModal, handleCloseModal, isUpdateMode, selectedItem, fet
                 setSizeDetails({
                     0: sizeDetails[0] || { quantity: 0, price: 0.00 }
                 });
-                console.log("THIS RAN:", selectedSizes)
-                console.log(sizeDetails)
             }
 
             const sizesArray = Object.keys(sizeDetails)
@@ -166,24 +164,26 @@ const ItemForm = ({ showModal, handleCloseModal, isUpdateMode, selectedItem, fet
             if (isUpdateMode) {
                 await ItemService.updateItem({ ...updatedItem, item_id: selectedItem.item_id });
             } else {
-                console.log(updatedItem)
                 await ItemService.createItem(updatedItem);
             }
 
             alert("Item has been " + (isUpdateMode ? "Updated." : "Created."));
-            setItemData({
-                item_name: '',
-                description: '',
-                category: '',
-                item_image: '',
-            });
-            setSelectedSizes([]);
-            setSizeDetails({});
             fetchItems();
-            handleCloseModal();
         } catch (error) {
-            console.error('Error creating or updating item:', error);
+            if (error.response.status === 409) {
+                alert("Item name already exists.")
+            }
+            console.error('Error creating or updating item:');
         }
+        setItemData({
+            item_name: '',
+            description: '',
+            category: '',
+            item_image: '',
+        });
+        setSelectedSizes([]);
+        setSizeDetails({});
+        handleCloseModal();
     };
 
     return (
@@ -218,13 +218,18 @@ const ItemForm = ({ showModal, handleCloseModal, isUpdateMode, selectedItem, fet
                     <Form.Group controlId="category">
                         <Form.Label>Category</Form.Label>
                         <Form.Control
-                            type="text"
+                            as="select"
                             name="category"
                             value={itemData.category}
                             onChange={handleTextChange}
                             required    
                             autoComplete="off"
-                        />
+                        >
+                            <option value="">Select Category</option>
+                            <option value="tiles">Tiles</option>
+                            <option value="bathroom">Bathroom</option>
+                            <option value="doors">Doors</option>
+                        </Form.Control>
                     </Form.Group>
                     <Form.Group controlId="sizes">
                         {itemData.category.toLowerCase() === 'tiles' ? (
@@ -279,9 +284,8 @@ const ItemForm = ({ showModal, handleCloseModal, isUpdateMode, selectedItem, fet
                                         placeholder="Quantity"
                                         name="quantity"
                                         min="0"
-                                        value={sizeDetails[0]?.quantity || 0}
+                                        value={sizeDetails[0]?.quantity || ''}
                                         onChange={(e) => handleSizeDetailChange(0, e)}
-                                        required={!isUpdateMode}
                                     />
                                     <Form.Control
                                         type="number"
@@ -289,10 +293,9 @@ const ItemForm = ({ showModal, handleCloseModal, isUpdateMode, selectedItem, fet
                                         placeholder="Price"
                                         name="price"
                                         min="0.00"
-                                        value={sizeDetails[0]?.price || 0.00}
+                                        value={sizeDetails[0]?.price || ''}
                                         onChange={(e) => handleSizeDetailChange(0, e)}
                                         className="ml-2"
-                                        required={!isUpdateMode}
                                     />
                                 </div>
                             </>
