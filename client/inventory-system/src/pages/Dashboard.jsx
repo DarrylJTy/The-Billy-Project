@@ -174,7 +174,7 @@ function Dashboard() {
                   {totalItemsOutOfStock ? (
                       <h2>{totalItemsOutOfStock?.toLocaleString()}</h2>
                   ) : (
-                      spinnerComponent()
+                      <h2>0</h2>
                   )}
                 </div>
               </div>
